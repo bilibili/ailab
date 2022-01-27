@@ -128,7 +128,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 - [ ]  优化纹理保留，削减模型处理痕迹
 - [ ]  简单的GUI
 
-:stuck_out_tongue_closed_eyes: 欢迎各位大佬提出建议和需求:thumbsup: ! 可以在**issue**:innocent: 进行留言，或者加qq群: :link:
+:stuck_out_tongue_closed_eyes: 欢迎各位大佬在**issue**:innocent: 进行留言,提出各种建议和需求:thumbsup: ! 
 
 ### 8. 感谢
 训练代码来自但不局限于 :star2: [RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):star2: . <br>
