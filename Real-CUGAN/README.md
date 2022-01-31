@@ -22,7 +22,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
   ![compare2](demos/compare2.png)
   极致渣清型(注意画风保留、杂线、线条)(图源:Real-ESRGAN官方测试样例)
   ![compare3](demos/compare3.png)
-  景深虚化型(蜡烛为刻意虚化特效，应该尽量保留原始版本不经过处理)(图源:《～闘志の華～戦国乙女2ボナ楽曲PV》第16秒)
+  景深虚化型(蜡烛为后景，刻意加入了虚化特效，应该尽量保留原始版本不经过处理)(图源:《～闘志の華～戦国乙女2ボナ楽曲PV》第16秒)
   ![compare4](demos/compare4.png)
 - **详细对比**
 
@@ -70,9 +70,9 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
         >  **auto:** 当输入图片文件夹图片分辨率不同时，填写auto自动调节不同图片tile模式，未来将支持该模式。
 
 - #### 模型分类说明：
-	 - 降噪版：如果原片噪声多，压得烂，推荐使用；目前2倍模型支持了3个降噪等级
+	 - 降噪版：如果原片噪声多，压得烂，推荐使用；目前2倍模型支持了3个降噪等级；
 	 - 无降噪版：如果原片噪声不多，压得还行，但是想提高分辨率/清晰度/做通用性的增强、修复处理，推荐使用；
-	 - 保守版：如果你担心丢失纹理，担心画风被改变，担心颜色被增强，总之就是各种担心AI会留下浓重的处理痕迹，推荐使用该版本
+	 - 保守版：如果你担心丢失纹理，担心画风被改变，担心颜色被增强，总之就是各种担心AI会留下浓重的处理痕迹，推荐使用该版本。
 
 ### 3. Waifu2x-caffe玩家
 
@@ -94,6 +94,8 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 :white_check_mark:  **numpy**             <br>
 :white_check_mark:  **opencv-python**     <br>
 :white_check_mark:  **moviepy**           <br>
+upcunet_v3.py:模型+图像推理
+inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 
 ### 5. VapourSynth玩家
 移步[Readme](VapourSynth/README.md)
@@ -138,7 +140,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 ### 8. 感谢
 训练代码来自但不局限于 :star2: [RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):star2: . <br>
 
-Waiuf2x模型结构魔改自Waifu2x官方:star2: [CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py):star2: .
+模型结构魔改自Waifu2x官方:star2: [CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py):star2: .
 
 
 
