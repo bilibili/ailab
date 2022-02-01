@@ -138,7 +138,7 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 :stuck_out_tongue_closed_eyes: 欢迎各位大佬在**issue**:innocent: 进行留言,提出各种建议和需求:thumbsup: ! 
 
 ### 8. 感谢
-训练代码来自但不局限于 :star2: [RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):star2: . <br>
+这里不公开训练代码，训练步骤参考了但不局限于 :star2: [RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):star2: . 想自行训练的请移步该仓库。<br>
 
 模型结构魔改自Waifu2x官方:star2: [CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py):star2: .
 
