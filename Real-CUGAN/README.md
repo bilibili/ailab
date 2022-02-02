@@ -38,7 +38,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 ### 2. Windows玩家
 修改config.py配置参数，双击go.bat运行
 - #### 超分工具：
-    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelese :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(暂时失效)(提取码okgK,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014Md1DALUSS6)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(暂时失效)(提取码okgK,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014Md1DALUSS6)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### 系统环境：
     - :heavy_check_mark: 在win10-64bit系统下进行测试
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
