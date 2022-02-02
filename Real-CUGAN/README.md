@@ -38,7 +38,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 ### 2. Windows玩家
 修改config.py配置参数，双击go.bat运行
 - #### 超分工具：
-    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(暂时失效)(提取码okgK,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014Md1DALUSS6)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(提取码tX4O,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### 系统环境：
     - :heavy_check_mark: 在win10-64bit系统下进行测试
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
@@ -80,9 +80,9 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 #### 我们目前为waifu2x-caffe玩家提供了两套参数：
 :fire: **Real-CUGAN2x标准版(denoise-level3)** 和 :fire: **Real-CUGAN2x无切割线版**
 <br>
-    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[和彩云(提取码okgK,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014Md1DALUSS6)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[和彩云(提取码tX4O,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
     <br>
-用户可以用这套参数覆盖原有模型参数（记得对原有参数进行备份），用原有被覆盖的预设进行超分。<br>
+用户可以用这套参数覆盖原有model-cunet模型参数（如有需要，记得对原有参数进行备份），用原有被覆盖的预设（按当前的文件名，是2x仅超分不降噪）进行超分。<br>
 
 :heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: 由于waifu2x-caffe的切割机制，对于标准版，crop_size应该尽量调大，否则可能造成切割线。如果**发现出现切割线，** 请移步下载windows应用，它支持无切割线痕迹的crop(tile_mode），既能有效降低显存占用需求，crop也是无损的。或者使用我们额外提供的无切割线版，它会造成更多的纹理涂抹和虚化区域清晰化。
 
