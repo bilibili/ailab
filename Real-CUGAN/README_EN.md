@@ -32,13 +32,14 @@ https://user-images.githubusercontent.com/61866546/148071244-90293316-21cf-43b9-
 | traning set         | Private anime training set, unknown magnitude and quality                             | Private anime training set, unknown magnitude and quality                             | Million scale high quality patch training set                                |
 | speed(times)    | Baseline                                                     | 2.2x                                                         | 1x                                                           |
 | visual effect | can't deblur; artifacts are not completely removed                               | The sharpening strength is the largest. The painting style may be changed. The lines may be incorrectly reconstructed. The bokeh effect region may be forced to be clear.                  | Sharper line style than waifu2x. Bokeh effect region maintained better. Texture preserved better.
-| compatibility         | 大量existing windows-apps，<br />Caffe，PyTorch，NCNN, VapourSynth | PyTorch，VapourSynth，NCNN                       | the same as waifu2x             |
+| compatibility         | numbers of existing windows-apps，<br />Caffe，PyTorch，NCNN, VapourSynth | PyTorch，VapourSynth，NCNN                       | the same as waifu2x             |
 | enhancement        | supports multiple denoise strength                                           |                only support default enhancement strength                            | 5 different enhancement strength for 2x, 3 for 3x, 3 for 4x now |
 | SR resolution           | 1x+2x                                               | 4x                                                    | 2x+3x+4x are supported now, and 1x model is training             |
 
 ### 2. For windows users
+modify config.py, and double click go.bat to execute Real-CUGAN.
 - #### Executable file：
-    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[HecaiDrive(extract code:okgK) :link:](https://caiyun.139.com/m/i?014Md1DALUSS6)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tX4O) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### System environment：
     - :heavy_check_mark: Tested in windows10 64bit.
     - :heavy_check_mark: Light version: cuda >= 10.0. 【Heavy version: cuda >= 11.1】
@@ -63,11 +64,11 @@ https://user-images.githubusercontent.com/61866546/148071244-90293316-21cf-43b9-
 #### We support two weights for waifu2x-caffe users now:
 :fire: **Real-CUGAN2x standard version** and :fire: **Real-CUGAN2x no crop line version**
 <br>
-    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[HecaiDrive(extract code:okgK) :link:](https://caiyun.139.com/m/i?014Md1DALUSS6)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tX4O) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
     <br>
     Users can replace the original weights with the new ones (remember to backup the original weights if you want to reuse them), and use the original setting to super resolve images.<br>
 
-:heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: due to the crop mechanism of waifu2x-caffe, for standard version，big crop_size is recommanded, or the crop line artifact may be caused. If **crop line artifact** is found, please use our windows package or the 'no crop line' version. The tile_mode of windows package version is lossless. The 'no crop line' version waifu2x-caffe weights may cause more texture loss.
+:heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: due to the crop mechanism of waifu2x-caffe, for standard version，big crop_size is recommanded, or the crop line artifact may be caused. If **crop line edge artifact** is found, please use our windows package or the 'no crop line' version. The tile_mode of windows package version is lossless. The 'no edge artifact' version waifu2x-caffe weights may cause more texture loss.
 
 >For developers, it is recommended to use the whole image as input. Pytorch version (tile mode) is recommended if you want the program to require less video memory.
 
@@ -77,6 +78,9 @@ https://user-images.githubusercontent.com/61866546/148071244-90293316-21cf-43b9-
 :white_check_mark:  **numpy**             <br>
 :white_check_mark:  **opencv-python**     <br>
 :white_check_mark:  **moviepy**           <br>
+
+upcunet_v3.py:model file and image inference script <br>
+inference_video.py: a simple script for inferencing anime videos using Real-CUGAN
 
 ### 5. For VapourSynth users
 
