@@ -80,7 +80,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 #### 我们目前为waifu2x-caffe玩家提供了两套参数：
 :fire: **Real-CUGAN2x标准版(denoise-level3)** 和 :fire: **Real-CUGAN2x无切割线版**
 <br>
-    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[和彩云(提取码tX4O,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[和彩云(提取码tX4O,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
     <br>
 用户可以用这套参数覆盖原有model-cunet模型参数（如有需要，记得对原有参数进行备份），用原有被覆盖的预设（按当前的文件名，是2x仅超分不降噪）进行超分。<br>
 
@@ -95,7 +95,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 :white_check_mark:  **numpy**             <br>
 :white_check_mark:  **opencv-python**     <br>
 :white_check_mark:  **moviepy**           <br>
-upcunet_v3.py:模型+图像推理
+upcunet_v3.py:模型+图像推理 <br>
 inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 
 ### 5. VapourSynth玩家
