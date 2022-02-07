@@ -6,7 +6,7 @@ Real Cascade U-Nets for Anime Image Super Resolution
 
 :fire: **Real-CUGAN**:fire: 是一个使用百万级动漫数据进行训练的，结构与Waifu2x兼容的通用动漫图像超分辨率模型。它支持**2x\3x\4x**倍超分辨率，其中2倍模型支持4种降噪强度与保守修复，3倍/4倍模型支持2种降噪强度与保守修复。
 
-**Real-CUGAN** 为windows用户打包了一个可执行环境，现已有GUI与Web版本。
+**Real-CUGAN** 为Windows用户打包了一个可执行环境。同时目前已有Windows-GUI与Web版本可使用。
 
 [更新进展(Windows-GUI/Web)](https://github.com/bilibili/ailab/tree/main/Real-CUGAN#Acknowledgement)
 
@@ -145,7 +145,7 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 这里不公开训练代码，训练步骤参考了但不局限于 :star2: [RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):star2: . 想自行训练的请移步该仓库。<br>
 模型结构魔改自Waifu2x官方:star2: [CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py):star2: .<br>
 另有更新进展如下：<br>
- - Squirrel补帧团队基于RealCUGAN（PyTorch版本。以及waifu2x/RealESRGAN）开发了一个图形界面程序（默认中文），并免费发布，[SAE](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)<br>
+ - Squirrel补帧团队基于RealCUGAN（PyTorch版本。以及waifu2x/RealESRGAN）开发了一个图形界面程序（默认中文），并免费发布，[Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)<br>
  - [mnixry](https://github.com/mnixry)制作了RealCUGAN的[Web-CPU-PyTorch版](https://huggingface.co/spaces/mayhug/Real-CUGAN),大家可以免费尝鲜测试。1080P图像的2倍尺度大约需要等待24s返回结果；<br>
  - [AaronFeng753](https://github.com/AaronFeng753)将RealCUGAN的Caffe版本集成进[Waifu2x-Extension-GUI](https://github.com/AaronFeng753/Waifu2x-Extension-GUI)，<br>
 感谢他们的贡献！
