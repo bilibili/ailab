@@ -3,16 +3,14 @@ Real Cascade U-Nets for Anime Image Super Resolution
 
 :fire: **Real-CUGAN**:fire: is an AI super resolution model for anime images, trained in a million scale anime dataset, using the same architecture as Waifu2x-CUNet. It supports **2x\3x\4x** super resolving. For different enhancement strength, now 2x Real-CUGAN supports 5 model weights, 3x/4x Real-CUGAN supports 3 model weights.
 
-**Real-CUGAN** package an executable environment for windows users. GUI will be supported in the future.
+**Real-CUGAN** packages an executable environment for windows users. GUI and web version are also supported now.<br>
+
+[Update progress(Windows-GUI/Web)](https://github.com/bilibili/ailab/tree/main/Real-CUGAN/README_EN.md#Acknowledgement)
+
 
 ### 1. Comparasion
 
-
-
-
-https://user-images.githubusercontent.com/61866546/148071244-90293316-21cf-43b9-a81b-e6f7abe113d4.mp4
-
-
+https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-ac05-4d34cc58aa79.mp4
 
 
 - **visual effect comparasion**
@@ -39,7 +37,7 @@ https://user-images.githubusercontent.com/61866546/148071244-90293316-21cf-43b9-
 ### 2. For windows users
 modify config.py, and double click go.bat to execute Real-CUGAN.
 - #### Executable file：
-    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tX4O) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:baRo) :link:](https://caiyun.139.com/m/i?015CHHkvdreCX)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### System environment：
     - :heavy_check_mark: Tested in windows10 64bit.
     - :heavy_check_mark: Light version: cuda >= 10.0. 【Heavy version: cuda >= 11.1】
@@ -64,7 +62,7 @@ modify config.py, and double click go.bat to execute Real-CUGAN.
 #### We support two weights for waifu2x-caffe users now:
 :fire: **Real-CUGAN2x standard version** and :fire: **Real-CUGAN2x no crop line version**
 <br>
-    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tX4O) :link:](https://caiyun.139.com/m/i?015CHcCjUh9SL)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:baRo) :link:](https://caiyun.139.com/m/i?015CHHkvdreCX)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
     <br>
     Users can replace the original weights with the new ones (remember to backup the original weights if you want to reuse them), and use the original setting to super resolve images.<br>
 
@@ -123,8 +121,12 @@ You can download the weights from [netdisk links](README_EN.md#2-for-windows-use
 - [ ]  Simple GUI
 
 ### 8. Acknowledgement
-The training code is from but not limited to: :star2: [RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):star2: . <br>
+The training code is from but not limited to:[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md).<br>
 
-The original waifu2x-cunet architecture is from: :star2: [CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py):star2: .
+The original waifu2x-cunet architecture is from:[CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py).
 
-
+Update progress:
+- Windows GUI (PyTorch version),by [SquirrelVideoFrameInterpolation Team](https://github.com/Justin62628/Squirrel-RIFE/tree/main), [Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)<br>
+- [Web service (CPU-PyTorch version)](https://huggingface.co/spaces/mayhug/Real-CUGAN),by [mnixry](https://github.com/mnixry)
+<br>
+Thanks for their contribution!
