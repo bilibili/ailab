@@ -8,7 +8,11 @@ Real Cascade U-Nets for Anime Image Super Resolution
 
 **Real-CUGAN** 为Windows用户打包了一个可执行环境。同时目前已有Windows-GUI与Web版本可使用。
 
-[更新进展(Windows-GUI/Web)](https://github.com/bilibili/ailab/tree/main/Real-CUGAN#Acknowledgement)
+[更新进展](https://github.com/bilibili/ailab/tree/main/Real-CUGAN#Acknowledgement)<br>
+2022-02-07:Windows-GUI版/Web版<br>
+2022-02-09:colab示例代码<br>
+2022-02-13:适用于移动端和AMD显卡的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)<br>
+如果Real-CUGAN对您的项目有帮助，可以⭐与分享一波，感谢~
 
 
 ### 1. 效果对比
@@ -41,7 +45,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 ### 2. Windows玩家
 修改config.py配置参数，双击go.bat运行
 - #### 超分工具：
-    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(提取码baRo,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHHkvdreCX)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(提取码tEr1,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### 系统环境：
     - :heavy_check_mark: 在win10-64bit系统下进行测试
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
@@ -83,7 +87,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 #### 我们目前为waifu2x-caffe玩家提供了两套参数：
 :fire: **Real-CUGAN2x标准版(denoise-level3)** 和 :fire: **Real-CUGAN2x无切割线版**
 <br>
-    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[和彩云(提取码baRo,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHHkvdreCX)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[和彩云(提取码tEr1,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
     <br>
 用户可以用这套参数覆盖原有model-cunet模型参数（如有需要，记得对原有参数进行备份），用原有被覆盖的预设（按当前的文件名，是2x仅超分不降噪）进行超分。<br>
 
@@ -104,7 +108,10 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 ### 5. VapourSynth玩家
 移步[Readme](VapourSynth/README.md)
 
-### 6.:european_castle: Model Zoo
+### 6. realcugan-ncnn-vulkan
+[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)已出现，这意味着A卡用户和移动端用户也可以使用GPU跑Real-CUGAN模型了，大家可以去催更啦~
+
+### 7.:european_castle: Model Zoo
 
 可在网盘路径下载完整包与更新参数包获取各模型参数。
 
@@ -132,7 +139,7 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 	</tr>
 </table>
 
-### 7. TODO：
+### 8. TODO：
 - [ ]  快速模型，提高推理速度，降低显存占用需求
 - [ ]  可调整的增强锐度，降噪强度，去模糊强度
 - [ ]  一步超到任意指定分辨率
@@ -142,12 +149,13 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 :stuck_out_tongue_closed_eyes: 欢迎各位大佬在**issue**:innocent: 进行留言,提出各种建议和需求:thumbsup: ! 
 
 ### Acknowledgement
-这里不公开训练代码，训练步骤参考了但不局限于[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md):. 想自行训练的请移步该仓库。<br>
+这里不公开训练代码，训练步骤参考了但不局限于[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md). 想自行训练的请移步该仓库。<br>
 模型结构魔改自Waifu2x官方[CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py).<br>
 另有:star2:更新进展:star2:如下：<br>
- - [Squirrel补帧团队](https://github.com/Justin62628/Squirrel-RIFE/tree/main)基于RealCUGAN(PyTorch版本)与Waifu2x/RealESRGAN开发了一个图形界面程序（默认中文），并免费发布，[Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)<br>
+ - [Squirrel补帧团队](https://github.com/Justin62628/Squirrel-RIFE/tree/main)基于RealCUGAN(PyTorch版本)与Waifu2x/RealESRGAN开发了一个图形界面程序（默认中文），并免费发布，[Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)；<br>
  - [mnixry](https://github.com/mnixry)制作了RealCUGAN的[Web-CPU-PyTorch版](https://huggingface.co/spaces/mayhug/Real-CUGAN),大家可以免费尝鲜测试。1080P图像的2倍尺度大约需要等待24s返回结果；<br>
- - [AaronFeng753](https://github.com/AaronFeng753)将RealCUGAN的Caffe版本集成进[Waifu2x-Extension-GUI](https://github.com/AaronFeng753/Waifu2x-Extension-GUI)，
- <br>
+ - [nihui](https://github.com/nihui) 实现了RealCUGAN的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan) ,AMD显卡用户和移动端用户亦可以使用； <br>
+ - [AaronFeng753](https://github.com/AaronFeng753)将RealCUGAN的Caffe版本集成进[Waifu2x-Extension-GUI](https://github.com/AaronFeng753/Waifu2x-Extension-GUI)；<br>
+
 感谢他们的贡献！
 
