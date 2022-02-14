@@ -4,32 +4,32 @@ Real Cascade U-Nets for Anime Image Super Resolution
 :fire: **Real-CUGAN**:fire: is an AI super resolution model for anime images, trained in a million scale anime dataset, using the same architecture as Waifu2x-CUNet. It supports **2x\3x\4x** super resolving. For different enhancement strength, now 2x Real-CUGAN supports 5 model weights, 3x/4x Real-CUGAN supports 3 model weights.
 
 **Real-CUGAN** packages an executable environment for windows users. GUI and web version are also supported now.<br>
-If you find Real-CUGAN helpful for your anime videos/projects, please help staring :star: this repo or share it to your friends, thanks! <br>
+If you find Real-CUGAN helpful for your anime videos/projects, please help by starring :star: this repo or sharing it with your friends, thanks! <br>
 
 [Update progress(Windows-GUI/Web)](https://github.com/bilibili/ailab/tree/main/Real-CUGAN/README_EN.md#Acknowledgement)
 
 
-### 1. Comparasion
+### 1. Comparison
 
 
 https://user-images.githubusercontent.com/61866546/152800856-45bdee20-f7c7-443d-9430-f08dc5c805b8.mp4
 
 
-- **visual effect comparasion**
+- **visual effect comparison**
   <br>
-  texture chanllenge case
+  texture challenge case
   ![compare1](demos/title-compare1.png)
-  line chanllenge case
+  line challenge case
   ![compare2](demos/compare2.png)
   heavy artifact case
   ![compare3](demos/compare3.png)
   bokeh effect case
   ![compare4](demos/compare4.png)
-- **Detailed comparasion**
+- **Detailed comparison**
 
 |                | Waifu2x(CUNet)                                               | Real-ESRGAN(Anime6B)                                         | Real-CUGAN                                                   |
 | -------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| traning set         | Private anime training set, unknown magnitude and quality                             | Private anime training set, unknown magnitude and quality                             | Million scale high quality patch training set                                |
+| training set         | Private anime training set, unknown magnitude and quality                             | Private anime training set, unknown magnitude and quality                             | Million scale high quality patch training set                                |
 | speed(times)    | Baseline                                                     | 2.2x                                                         | 1x                                                           |
 | visual effect | can't deblur; artifacts are not completely removed                               | The sharpening strength is the largest. The painting style may be changed. The lines may be incorrectly reconstructed. The bokeh effect region may be forced to be clear.                  | Sharper line style than waifu2x. Bokeh effect region maintained better. Texture preserved better.
 | compatibility         | numbers of existing windows-apps，<br />Caffe，PyTorch，NCNN, VapourSynth | PyTorch，VapourSynth，NCNN                       | the same as waifu2x             |
@@ -48,8 +48,8 @@ modify config.py, and double click go.bat to execute Real-CUGAN.
 - #### config file：
   #### a. common settings
     - mode: image/video;
-    - model_path: the path of model weights(2x model has 4 weight files, 3x/4x model only has 1 weight file);
-    - device: cuda device number. If you want to use multiple GPUs to super resolve images, it's recommanded to manually divide the tasks into different folders and fill in different cuda device numbers;
+    - model_path: the path of model weights (2x model has 4 weight files, 3x/4x model only has 1 weight file);
+    - device: cuda device number. If you want to use multiple GPUs to super resolve images, it's recommended to manually divide the tasks into different folders and fill in different cuda device numbers;
     - you need fill in the input and output dir path for image task, and the input and output video file path for video task.
 
   #### b. settings for video task
@@ -73,13 +73,13 @@ modify config.py, and double click go.bat to execute Real-CUGAN.
 >For developers, it is recommended to use the whole image as input. Pytorch version (tile mode) is recommended if you want the program to require less video memory.
 
 
-### 4. Python environment dependence
+### 4. Python environment dependencies
 :white_check_mark:  **torch>=1.0.0**      <br>
 :white_check_mark:  **numpy**             <br>
 :white_check_mark:  **opencv-python**     <br>
 :white_check_mark:  **moviepy**           <br>
 
-upcunet_v3.py:model file and image inference script <br>
+upcunet_v3.py: model file and image inference script <br>
 inference_video.py: a simple script for inferencing anime videos using Real-CUGAN
 
 ### 5. For VapourSynth users
