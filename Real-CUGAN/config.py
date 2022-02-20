@@ -2,8 +2,7 @@
 scale=3
 
 #参数路径，可更换
-model_path2 = "weights_v3/up2x-latest-no-denoise.pth"
-# model_path2 = "weights_v3/up2x-latest-denoise3x.pth"e
+model_path2 = "weights_v3/up2x-latest-denoise3x.pth"
 model_path3 = "weights_v3/up3x-latest-denoise3x.pth"
 model_path4 = "weights_v3/up4x-latest-denoise3x.pth"
 
@@ -12,8 +11,10 @@ mode="image"#video#image
 
 #早期显卡开半精度不会提速，但是开半精度可以省显存。
 half=True
-#tile分为0~4一共5个mode。0在推理时不对图像进行切块，最占内存，mode越提升越省显存，但是可能会降低GPU利用率，降低推理速度
-tile=3
+#tile为切块个数。0在推理时不对图像进行切块，最占内存，mode越提升越省显存，但是可能会降低GPU利用率，降低推理速度
+tile=5
+#cache_mode:显存占用0>1>2,2可解锁输入超大分辨率图像不爆显存，速度降低60%
+cache_mode=1
 
 #超图像设置
 device="cuda:0"#0代表卡号，多卡的话可以写不同config并行开，显存多的话一张卡也可以开多个
