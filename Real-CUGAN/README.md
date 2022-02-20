@@ -12,7 +12,7 @@ Real Cascade U-Nets for Anime Image Super Resolution
 2022-02-07:[Windows-GUI版](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)/[Web-CPU版](https://huggingface.co/spaces/mayhug/Real-CUGAN)<br>
 2022-02-09:[Colab示例代码](https://github.com/bilibili/ailab/blob/main/Real-CUGAN/colab-demo.ipynb)<br>
 2022-02-17:适用于移动端和AMD显卡的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)<br>
-2022-02-20:添加低显存模式，以降低60%的速度为代价，解锁超大分辨率输入，下载20220220更新包或完整包<br>
+2022-02-20:添加低显存模式(支持>1.5G显存的N卡)，以牺牲60%的速度为代价，解锁超大分辨率输入图像，下载20220220更新包或完整包使用。<br>
 如果Real-CUGAN对您的项目有帮助，可以⭐与分享一波，感谢~
 
 
@@ -50,6 +50,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 - #### 系统环境：
     - :heavy_check_mark: 在win10-64bit系统下进行测试
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
+    - :heavy_check_mark: 只支持N卡或CPU，N卡需要至少1.5G显存
     - :heavy_exclamation_mark: **注意30系列 nvidia GPU 只能用大包.**
 
 - #### 使用config文件说明：
@@ -72,13 +73,10 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
         > **preset:** 越慢代表越低编码速度越高质量+更吃CPU，CPU不够应该调低级别，比如slow，medium，fast，faster
 
     - half: 半精度推理，不建议关闭
-    - tile: 有7种模式，数字越大显存需求越低，相对地可能会小幅降低推理速度 **{0, 1, 2, 3, 4, 5, auto}** <br>
+    - tile: 数字越大显存需求越低，相对地可能会小幅降低推理速度 **{0, 1, x, auto}** <br>
         > **0:** 直接使用整张图像进行推理，大显存用户或者低分辨率需求可使用 <br>
-        >  **1:** 对长边平分切成两块推理（95%，显存占用，下同）<br>
-        >  **2:** 宽高分别平分切成两块推理（81%）<br>
-        >  **3:** 宽高分别平分切成三块推理（61%）<br>
-        >  **4:** 宽高分别平分切成四块推理（54%）<br>
-        >  **5:** 宽高分别平分切成五块推理（50%）<br>
+        >  **1:** 对长边平分切成两块推理<br>
+        >  **x:** 宽高分别平分切成x块推理<br>
         >  **auto:** 当输入图片文件夹图片分辨率不同时，填写auto自动调节不同图片tile模式，未来将支持该模式。
 
 - #### 模型分类说明：
