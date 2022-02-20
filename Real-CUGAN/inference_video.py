@@ -7,12 +7,13 @@ from moviepy.editor import VideoFileClip
 from upcunet_v3 import RealWaifuUpScaler
 from time import time as ttime,sleep
 class UpScalerMT(threading.Thread):
-    def __init__(self, inp_q, res_q, device, model,p_sleep,nt,tile):
+    def __init__(self, inp_q, res_q, device, model,p_sleep,nt,tile,cache_mode):
         threading.Thread.__init__(self)
         self.device = device
         self.inp_q = inp_q
         self.res_q = res_q
         self.model = model
+        self.cache_mode=cache_mode
         self.nt = nt
         self.p_sleep=p_sleep
         self.tile=tile
@@ -20,7 +21,7 @@ class UpScalerMT(threading.Thread):
     def inference(self, tmp):
         idx, np_frame = tmp
         with torch.no_grad():
-            res = self.model(np_frame,tile)
+            res = self.model(np_frame,self.tile,self.cache_mode)
         if(self.nt>1):
             sleep(uniform(self.p_sleep[0],self.p_sleep[1]))
         return (idx, res)
@@ -33,7 +34,7 @@ class UpScalerMT(threading.Thread):
                 break
             self.res_q.put(self.inference(tmp))
 class VideoRealWaifuUpScaler(object):
-    def __init__(self,nt,n_gpu,scale,half,tile,p_sleep,decode_sleep,encode_params):
+    def __init__(self,nt,n_gpu,scale,half,tile,cache_mode,p_sleep,decode_sleep,encode_params):
         self.nt = nt
         self.n_gpu = n_gpu  # 每块GPU开nt个进程
         self.scale = scale
@@ -48,7 +49,7 @@ class VideoRealWaifuUpScaler(object):
             #load+device初始化好当前卡的模型
             model=RealWaifuUpScaler(self.scale, eval("model_path%s" % self.scale), half, device)
             for _ in range(self.nt):
-                upscaler = UpScalerMT(self.inp_q, self.res_q, device, model,p_sleep,self.nt,tile)
+                upscaler = UpScalerMT(self.inp_q, self.res_q, device, model,p_sleep,self.nt,tile,cache_mode)
                 upscaler.start()
 
     def __call__(self, inp_path,opt_path):
@@ -105,8 +106,8 @@ class VideoRealWaifuUpScaler(object):
         print(inp_path,"done,time cost:",t1 - t0)
 
 if __name__ == '__main__':
-    from config import half, model_path2, model_path3, model_path4, tile, scale, device, encode_params, p_sleep, decode_sleep, nt, n_gpu
+    from config import half, model_path2, model_path3, model_path4, tile, scale, device, encode_params, p_sleep, decode_sleep, nt, n_gpu,cache_mode
     inp_path = "432126871-clip6s.mp4"
     opt_path = "432126871-clip6s-2x.mp4"
-    video_upscaler=VideoRealWaifuUpScaler(nt,n_gpu,scale,half,tile,p_sleep,decode_sleep,encode_params)
+    video_upscaler=VideoRealWaifuUpScaler(nt,n_gpu,scale,half,tile,p_sleep,decode_sleep,encode_params,cache_mode)
     video_upscaler(inp_path,opt_path)
