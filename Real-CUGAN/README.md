@@ -9,9 +9,10 @@ Real Cascade U-Nets for Anime Image Super Resolution
 **Real-CUGAN** 为Windows用户打包了一个可执行环境。同时目前已有Windows-GUI与Web版本可使用。
 
 [更新进展](https://github.com/bilibili/ailab/tree/main/Real-CUGAN#Acknowledgement)<br>
-2022-02-07:Windows-GUI版/Web版<br>
-2022-02-09:colab示例代码<br>
-2022-02-13:适用于移动端和AMD显卡的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)<br>
+2022-02-07:[Windows-GUI版](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)/[Web-CPU版](https://huggingface.co/spaces/mayhug/Real-CUGAN)<br>
+2022-02-09:[Colab示例代码](https://github.com/bilibili/ailab/blob/main/Real-CUGAN/colab-demo.ipynb)<br>
+2022-02-17:适用于移动端和AMD显卡的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)<br>
+2022-02-20:添加低显存模式，以降低60%的速度为代价，解锁超大分辨率输入，下载20220220更新包或完整包<br>
 如果Real-CUGAN对您的项目有帮助，可以⭐与分享一波，感谢~
 
 
@@ -43,7 +44,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 | 尺度           | 仅支持1倍和2倍                                               | 仅支持4倍                                                    | 已支持2倍、3倍、4倍，1倍训练中              |
 
 ### 2. Windows玩家
-修改config.py配置参数，双击go.bat运行
+修改config.py配置参数，双击go.bat运行。
 - #### 超分工具：
     [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(提取码tEr1,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### 系统环境：
@@ -58,7 +59,10 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
     - model_path: 填写模型参数路径(目前3倍4倍超分只有3个模型，2倍有4个不同降噪强度模型和1个保守模型)；
     - device: 显卡设备号。如果有多卡超图片，建议手工将输入任务平分到不同文件夹，填写不同的卡号；
     - 超图像，需要填写输入输出文件夹；超视频，需要指定输入输出视频的路径。
-
+    - cache_mode:根据个人N卡显存大小调节缓存模式
+        > **0:** 默认使用cache缓存必要参数 <br>
+        > **1:** 使用cache缓存必要参数，对缓存进行8bit量化节省显存，带来15%延时增长 <br>
+        > **2:** 不使用cache，耗时约为默认模式的2.5倍，但是显存不受输入图像分辨率限制，tile填得够大，1.5G显存可超任意分辨率 <br>
     - :heavy_exclamation_mark: 如果使用windows路径，需要在双引号前加r
   #### b. 超视频设置
     - nt: 每张卡的线程数，如果显存够用，建议填写>=2
@@ -67,14 +71,14 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
         > **crf:** 通俗来讲，crf变低=高码率高质量 <br>
         > **preset:** 越慢代表越低编码速度越高质量+更吃CPU，CPU不够应该调低级别，比如slow，medium，fast，faster
 
-
     - half: 半精度推理，不建议关闭
-    - tile: 有6种模式，数字越大显存需求越低，相对地可能会小幅降低推理速度 **{0, 1, 2, 3, 4, auto}** <br>
+    - tile: 有7种模式，数字越大显存需求越低，相对地可能会小幅降低推理速度 **{0, 1, 2, 3, 4, 5, auto}** <br>
         > **0:** 直接使用整张图像进行推理，大显存用户或者低分辨率需求可使用 <br>
         >  **1:** 对长边平分切成两块推理（95%，显存占用，下同）<br>
         >  **2:** 宽高分别平分切成两块推理（81%）<br>
         >  **3:** 宽高分别平分切成三块推理（61%）<br>
         >  **4:** 宽高分别平分切成四块推理（54%）<br>
+        >  **5:** 宽高分别平分切成五块推理（50%）<br>
         >  **auto:** 当输入图片文件夹图片分辨率不同时，填写auto自动调节不同图片tile模式，未来将支持该模式。
 
 - #### 模型分类说明：
@@ -82,7 +86,22 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 	 - 无降噪版：如果原片噪声不多，压得还行，但是想提高分辨率/清晰度/做通用性的增强、修复处理，推荐使用；
 	 - 保守版：如果你担心丢失纹理，担心画风被改变，担心颜色被增强，总之就是各种担心AI会留下浓重的处理痕迹，推荐使用该版本。
 
-### 3. Waifu2x-caffe玩家
+### 3. Python玩家
+环境依赖 <br>
+:white_check_mark:  **torch>=1.0.0**      <br>
+:white_check_mark:  **numpy**             <br>
+:white_check_mark:  **opencv-python**     <br>
+:white_check_mark:  **moviepy**           <br>
+upcunet_v3.py:模型+图像推理 <br>
+inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
+
+### 4. VapourSynth玩家
+移步[Readme](VapourSynth/README.md)
+
+### 5. realcugan-ncnn-vulkan
+[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)已出现，这意味着A卡用户和移动端用户也可以使用GPU跑Real-CUGAN模型了~
+
+### 6. Waifu2x-caffe玩家
 
 #### 我们目前为waifu2x-caffe玩家提供了两套参数：
 :fire: **Real-CUGAN2x标准版(denoise-level3)** 和 :fire: **Real-CUGAN2x无切割线版**
@@ -94,22 +113,6 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 :heavy_exclamation_mark::heavy_exclamation_mark::heavy_exclamation_mark: 由于waifu2x-caffe的切割机制，对于标准版，crop_size应该尽量调大，否则可能造成切割线。如果**发现出现切割线，** 请移步下载windows应用，它支持无切割线痕迹的crop(tile_mode），既能有效降低显存占用需求，crop也是无损的。或者使用我们额外提供的无切割线版，它会造成更多的纹理涂抹和虚化区域清晰化。
 
 >开发者可以很轻松地进行适配，推荐使用整张图像作为输入。如果顾及显存问题，建议基于PyTorch版本进行开发，使用tile_mode降低显存占用需求。
-
-
-### 4. Python玩家
-环境依赖 <br>
-:white_check_mark:  **torch>=1.0.0**      <br>
-:white_check_mark:  **numpy**             <br>
-:white_check_mark:  **opencv-python**     <br>
-:white_check_mark:  **moviepy**           <br>
-upcunet_v3.py:模型+图像推理 <br>
-inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
-
-### 5. VapourSynth玩家
-移步[Readme](VapourSynth/README.md)
-
-### 6. realcugan-ncnn-vulkan
-[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)已出现，这意味着A卡用户和移动端用户也可以使用GPU跑Real-CUGAN模型了，大家可以去催更啦~
 
 ### 7.:european_castle: Model Zoo
 
