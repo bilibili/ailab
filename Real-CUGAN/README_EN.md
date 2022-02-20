@@ -7,7 +7,9 @@ Real Cascade U-Nets for Anime Image Super Resolution
 
 [Update progress](https://github.com/bilibili/ailab/tree/main/Real-CUGAN/README_EN.md#Acknowledgement)<br>
 2022-02-07:Windows-GUI/Web versions<br>
-2022-02-09:colab demo file<br>
+2022-02-09:Colab demo file<br>
+2022-02-17:[NCNN version](https://github.com/nihui/realcugan-ncnn-vulkan):AMD graphics card users and mobile phone users can use Real-CUGAN now.<br>
+2022-02-20:Low memory mode added. Now you can super resolve very large resolution images. You can download 20220220 updated packages to use it.<br>
 
 If you find Real-CUGAN helpful for your anime videos/projects, please help by starring :star: this repo or sharing it with your friends, thanks! <br>
 
@@ -17,7 +19,7 @@ If you find Real-CUGAN helpful for your anime videos/projects, please help by st
 https://user-images.githubusercontent.com/61866546/152800856-45bdee20-f7c7-443d-9430-f08dc5c805b8.mp4
 
 
-- **visual effect comparison**
+- **Visual effect comparison**
   <br>
   texture challenge case
   ![compare1](demos/title-compare1.png)
@@ -45,6 +47,7 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
 - #### System environment：
     - :heavy_check_mark: Tested in windows10 64bit.
     - :heavy_check_mark: Light version: cuda >= 10.0. 【Heavy version: cuda >= 11.1】
+    - :heavy_check_mark: If you use Nvidia cards, 1.5G video memory is needed.
     - :heavy_exclamation_mark: **Note that 30 series nvidia GPU only supports heavy version.**
 
 - #### config file：
@@ -59,9 +62,27 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
     - n_gpu: the number of GPUs you will use.
     - encode_params: if you don't know how to use ffmpeg, you shouldn't change it.
     - half: FP16 inference or FP32 inference. 'True' is recommended.
-    - tile: 0~4 is supported. The bigger the number, the less video memory is needed, and the lower inference speed it is.
+    - cache_mode: Default 0. Memory needed:0>1>2, speed:0>1(+15%time)>2(+150%time). You can super resolve very large resolution images using mode2.
+    - tile: 0~5 is supported. The bigger the number, the less video memory is needed, and the lower inference speed it is.
 
-### 3. For waifu2x-caffe users
+
+### 3. Python environment dependencies
+:white_check_mark:  **torch>=1.0.0**      <br>
+:white_check_mark:  **numpy**             <br>
+:white_check_mark:  **opencv-python**     <br>
+:white_check_mark:  **moviepy**           <br>
+
+upcunet_v3.py: model file and image inference script <br>
+inference_video.py: a simple script for inferencing anime videos using Real-CUGAN.
+
+### 4. For VapourSynth users
+
+Please see [Readme](VapourSynth/README_EN.md)
+
+### 5. realcugan-ncnn-vulkan
+[NCNN version](https://github.com/nihui/realcugan-ncnn-vulkan):AMD graphics card users and mobile phone users can use Real-CUGAN now.<br>
+
+### 6. For waifu2x-caffe users
 
 #### We support two weights for waifu2x-caffe users now:
 :fire: **Real-CUGAN2x standard version** and :fire: **Real-CUGAN2x no crop line version**
@@ -74,21 +95,7 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
 
 >For developers, it is recommended to use the whole image as input. Pytorch version (tile mode) is recommended if you want the program to require less video memory.
 
-
-### 4. Python environment dependencies
-:white_check_mark:  **torch>=1.0.0**      <br>
-:white_check_mark:  **numpy**             <br>
-:white_check_mark:  **opencv-python**     <br>
-:white_check_mark:  **moviepy**           <br>
-
-upcunet_v3.py: model file and image inference script <br>
-inference_video.py: a simple script for inferencing anime videos using Real-CUGAN
-
-### 5. For VapourSynth users
-
-Please see [Readme](VapourSynth/README_EN.md)
-
-### 6.:european_castle: Model Zoo
+### 7.:european_castle: Model Zoo
 
 You can download the weights from [netdisk links](README_EN.md#2-for-windows-users).
 
@@ -117,14 +124,14 @@ You can download the weights from [netdisk links](README_EN.md#2-for-windows-use
 </table>
 
 
-### 7. TODO：
+### 8. TODO：
 - [ ]  Lightweight/fast version
 - [ ]  Adjustable denoise, deblock, deblur, sharpening strength
 - [ ]  Super resolve the image to specified resolution end to end
 - [ ]  Optimize texture retention and reduce AI processing artifacts
 - [x]  Simple GUI
 
-### 8. Acknowledgement
+### Acknowledgement
 The training code is from but not limited to:[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md).<br>
 The original waifu2x-cunet architecture is from:[CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py).<br>
 Update progress:
