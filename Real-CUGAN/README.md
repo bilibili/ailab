@@ -12,7 +12,8 @@ Real Cascade U-Nets for Anime Image Super Resolution
 2022-02-07:[Windows-GUI版](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)/[Web-CPU版](https://huggingface.co/spaces/mayhug/Real-CUGAN)<br>
 2022-02-09:[Colab示例代码](https://github.com/bilibili/ailab/blob/main/Real-CUGAN/colab-demo.ipynb)<br>
 2022-02-17:适用于移动端和AMD显卡的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)<br>
-2022-02-20:添加低显存模式(支持>1.5G显存的N卡)，以牺牲60%的速度为代价，解锁超大分辨率输入图像，下载20220220更新包或完整包使用。<br>
+2022-02-20:添加低显存模式(支持>1.5G显存的N卡)，以牺牲60%的速度为代价，解锁超大分辨率输入图像；下载20220220更新包或完整包使用<br>
+2022-02-27:添加faster低显存模式，相比普通模式耗时仅增加25%；添加增强处理强度alpha参数（实验性参数）；下载20220227更新包或完整包使用<br>
 如果Real-CUGAN对您的项目有帮助，可以⭐与分享一波，感谢~
 
 
@@ -51,7 +52,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
     - :heavy_check_mark: 在win10-64bit系统下进行测试
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
     - :heavy_check_mark: 只支持N卡或CPU，N卡需要至少1.5G显存
-    - :heavy_exclamation_mark: **注意30系列 nvidia GPU 只能用大包.**
+    - :heavy_exclamation_mark: **注意30系列 nvidia GPU 只能用大包；<20系建议用小包**
 
 - #### 使用config文件说明：
   #### a. 通用参数设置
@@ -62,22 +63,24 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
     - 超图像，需要填写输入输出文件夹；超视频，需要指定输入输出视频的路径。
     - cache_mode:根据个人N卡显存大小调节缓存模式
         > **0:** 默认使用cache缓存必要参数 <br>
-        > **1:** 使用cache缓存必要参数，对缓存进行8bit量化节省显存，带来15%延时增长 <br>
-        > **2:** 不使用cache，耗时约为默认模式的2.5倍，但是显存不受输入图像分辨率限制，tile填得够大，1.5G显存可超任意分辨率 <br>
-    - :heavy_exclamation_mark: 如果使用windows路径，需要在双引号前加r
-  #### b. 超视频设置
-    - nt: 每张卡的线程数，如果显存够用，建议填写>=2
-    - n_gpu: 显卡数；
-    - encode_params: 编码参数 **{crf，preset}** 
-        > **crf:** 通俗来讲，crf变低=高码率高质量 <br>
-        > **preset:** 越慢代表越低编码速度越高质量+更吃CPU，CPU不够应该调低级别，比如slow，medium，fast，faster
-
-    - half: 半精度推理，不建议关闭
+        > **1:** 使用cache缓存必要参数，对缓存进行8bit量化节省显存，带来15%延时增长，肉眼完全无法感知的有损模式 <br>
+        > **2:** 不使用cache，有损模式。耗时约增加25%，仅在有景深虚化的图里有微小的误差，不影响纹理判断 <br>
+        > **3:** 不使用cache，无损模式。耗时约为默认模式的2.5倍，但是显存不受输入图像分辨率限制，tile填得够大，1.5G显存可超任意分辨率 <br>
     - tile: 数字越大显存需求越低，相对地可能会小幅降低推理速度 **{0, 1, x, auto}** <br>
         > **0:** 直接使用整张图像进行推理，大显存用户或者低分辨率需求可使用 <br>
         >  **1:** 对长边平分切成两块推理<br>
         >  **x:** 宽高分别平分切成x块推理<br>
         >  **auto:** 当输入图片文件夹图片分辨率不同时，填写auto自动调节不同图片tile模式，未来将支持该模式。
+    - alpha: 该值越大AI修复程度、痕迹越小，越模糊；alpha越小处理越烈，越锐化，色偏（对比度、饱和度增强）越大；默认为1不调整，推荐调整区间(0.75,1.3)
+    - half: 半精度推理，>=20系显卡直接写True开着就好
+    - :heavy_exclamation_mark: 如果使用windows路径，建议在双引号前加r
+  
+  #### b. 超视频设置
+    - nt: 每张卡的线程数，如果显存够用，建议填写>=2
+    - n_gpu: 使用显卡张数；
+    - encode_params: 编码参数 **{crf，preset}** 
+        > **crf:** 通俗来讲，crf变低=高码率高质量 <br>
+        > **preset:** 越慢代表越低编码速度越高质量+更吃CPU，CPU不够应该调低级别，比如slow，medium，fast，faster
 
 - #### 模型分类说明：
 	 - 降噪版：如果原片噪声多，压得烂，推荐使用；目前2倍模型支持了3个降噪等级；
@@ -141,8 +144,9 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 </table>
 
 ### 8. TODO：
-- [ ]  快速模型，提高推理速度，降低显存占用需求
-- [ ]  可调整的增强锐度，降噪强度，去模糊强度
+- [ ]  快速模型，提高推理速度
+- [x]  降低显存占用需求
+- [x]  可调整的增强锐度，降噪强度，去模糊强度
 - [ ]  一步超到任意指定分辨率
 - [ ]  优化纹理保留，削减模型处理痕迹
 - [x]  简单的GUI
