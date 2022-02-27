@@ -10,6 +10,7 @@ Real Cascade U-Nets for Anime Image Super Resolution
 2022-02-09:Colab demo file<br>
 2022-02-17:[NCNN version](https://github.com/nihui/realcugan-ncnn-vulkan):AMD graphics card users and mobile phone users can use Real-CUGAN now.<br>
 2022-02-20:Low memory mode added. Now you can super resolve very large resolution images. You can download 20220220 updated packages to use it.<br>
+2022-02-27:Faster low memory mode added, 25% slower than baseline mode; enhancement strength config alpha added. You can download 20220227 updated packages to use it.<br>
 
 If you find Real-CUGAN helpful for your anime videos/projects, please help by starring :star: this repo or sharing it with your friends, thanks! <br>
 
@@ -48,7 +49,7 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
     - :heavy_check_mark: Tested in windows10 64bit.
     - :heavy_check_mark: Light version: cuda >= 10.0. 【Heavy version: cuda >= 11.1】
     - :heavy_check_mark: If you use Nvidia cards, 1.5G video memory is needed.
-    - :heavy_exclamation_mark: **Note that 30 series nvidia GPU only supports heavy version.**
+    - :heavy_exclamation_mark: **Note that 30 series nvidia GPU only supports heavy version. Nvidia GPU (which is <2 series) users are recommended to use light version. **
 
 - #### config file：
   #### a. common settings
@@ -56,14 +57,15 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
     - model_path: the path of model weights (2x model has 4 weight files, 3x/4x model only has 1 weight file);
     - device: cuda device number. If you want to use multiple GPUs to super resolve images, it's recommended to manually divide the tasks into different folders and fill in different cuda device numbers;
     - you need fill in the input and output dir path for image task, and the input and output video file path for video task.
+    - half: FP16 inference or FP32 inference. 'True' is recommended.
+    - cache_mode: Default 0. Memory needed:0>1>>2=3, speed:0>1(+15%time)>2(+25%time)>3(+150%time). You can super resolve very large resolution images using mode2/3.
+    - tile: The bigger the number, less video memory is needed, and lower inference speed it is.
+    - alpha: The bigger the number, the enhancement strength is smaller, more blurry the output images are; the smaller the number, the enhancement strength is bigger, more sharpen image will be generated. Default 1 (don't adjust it). Recommended range: (0.75,1.3)
 
   #### b. settings for video task
     - nt: the threading number of each GPU. If the video memory is enough, >=2 is recommended (for faster inference).
     - n_gpu: the number of GPUs you will use.
     - encode_params: if you don't know how to use ffmpeg, you shouldn't change it.
-    - half: FP16 inference or FP32 inference. 'True' is recommended.
-    - cache_mode: Default 0. Memory needed:0>1>2, speed:0>1(+15%time)>2(+150%time). You can super resolve very large resolution images using mode2.
-    - tile: 0~5 is supported. The bigger the number, the less video memory is needed, and the lower inference speed it is.
 
 
 ### 3. Python environment dependencies
@@ -126,7 +128,8 @@ You can download the weights from [netdisk links](README_EN.md#2-for-windows-use
 
 ### 8. TODO：
 - [ ]  Lightweight/fast version
-- [ ]  Adjustable denoise, deblock, deblur, sharpening strength
+- [x]  Low (video card) memory mode
+- [x]  Adjustable denoise, deblur, sharpening strength
 - [ ]  Super resolve the image to specified resolution end to end
 - [ ]  Optimize texture retention and reduce AI processing artifacts
 - [x]  Simple GUI
