@@ -50,6 +50,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
     [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(提取码tEr1,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### 系统环境：
     - :heavy_check_mark: 在win10-64bit系统下进行测试
+    - :heavy_check_mark: CPU需支持SSE4和AVX
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
     - :heavy_check_mark: 只支持N卡或CPU，N卡需要至少1.5G显存
     - :heavy_exclamation_mark: **注意30系列 nvidia GPU 只能用大包；<20系建议用小包**
