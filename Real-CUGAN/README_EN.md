@@ -61,7 +61,7 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
     - half: FP16 inference or FP32 inference. 'True' is recommended.
     - cache_mode: Default 0. Memory needed:0>1>>2=3, speed:0>1(+15%time)>2(+25%time)>3(+150%time). You can super resolve very large resolution images using mode2/3.
     - tile: The bigger the number, less video memory is needed, and lower inference speed it is.
-    - alpha: The bigger the number, the enhancement strength is smaller, more blurry the output images are; the smaller the number, the enhancement strength is bigger, more sharpen image will be generated. Default 1 (don't adjust it). Recommended range: (0.75,1.3)
+    - alpha: The smaller the number, the enhancement strength is smaller, more blurry the output images are; the bigger the number, the enhancement strength is bigger, more sharpen image will be generated. Default 1 (don't adjust it). Recommended range: (0.75,1.3)
 
   #### b. settings for video task
     - nt: the threading number of each GPU. If the video memory is enough, >=2 is recommended (for faster inference).
