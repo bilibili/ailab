@@ -47,6 +47,7 @@ Modify config.py, and double click go.bat to execute Real-CUGAN.
     [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tEr1) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### System environment：
     - :heavy_check_mark: Tested in windows10 64bit.
+    - :heavy_check_mark: CPU with SSE4 and AVX support.
     - :heavy_check_mark: Light version: cuda >= 10.0. 【Heavy version: cuda >= 11.1】
     - :heavy_check_mark: If you use Nvidia cards, 1.5G video memory is needed.
     - :heavy_exclamation_mark: **Note that 30 series nvidia GPU only supports heavy version. Nvidia GPU (which is <2 series) users are recommended to use light version. **
