@@ -212,7 +212,7 @@ class UNet2(nn.Module):
         z = self.conv_bottom(x5)
         return z
 
-    def forward_a(self, x):#conv234结尾有se
+    def forward_a(self, x):
         x1 = self.conv1(x)
         x2 = self.conv1_down(x1)
         x1 = F.pad(x1, (-16, -16, -16, -16))
@@ -220,33 +220,33 @@ class UNet2(nn.Module):
         x2 = self.conv2.conv(x2)
         return x1,x2
 
-    def forward_b(self, x2):  # conv234结尾有se
+    def forward_b(self, x2):
         x3 = self.conv2_down(x2)
         x2 = F.pad(x2, (-4, -4, -4, -4))
         x3 = F.leaky_relu(x3, 0.1, inplace=True)
         x3 = self.conv3.conv(x3)
         return x2,x3
 
-    def forward_c(self, x2,x3):  # conv234结尾有se
+    def forward_c(self, x2,x3):
         x3 = self.conv3_up(x3)
         x3 = F.leaky_relu(x3, 0.1, inplace=True)
         x4 = self.conv4.conv(x2 + x3)
         return x4
 
-    def forward_d(self, x1,x4):  # conv234结尾有se
+    def forward_d(self, x1,x4,alpha):
+        x4*=alpha
         x4 = self.conv4_up(x4)
         x4 = F.leaky_relu(x4, 0.1, inplace=True)
         x5 = self.conv5(x1 + x4)
         x5 = F.leaky_relu(x5, 0.1, inplace=True)
-
         z = self.conv_bottom(x5)
         return z
-class UpCunet2x(nn.Module):#完美tile，全程无损
+class UpCunet2x(nn.Module):
     def __init__(self, in_channels=3, out_channels=3):
         super(UpCunet2x, self).__init__()
         self.unet1 = UNet1(in_channels, out_channels, deconv=True)
         self.unet2 = UNet2(in_channels, out_channels, deconv=False)
-    def forward(self, x,tile_mode,cache_mode,alpha):#1.7G
+    def forward(self, x,tile_mode,cache_mode,alpha):
         n, c, h0, w0 = x.shape
         if ("Half" in x.type()):if_half=True
         else:if_half=False
@@ -267,11 +267,11 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
             else:
                 crop_size_h=((h0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//2*2+2#能被2整除
-            crop_size=(crop_size_h,crop_size_w)#6.6G
+            crop_size=(crop_size_h,crop_size_w)
         elif(tile_mode>=2):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#3.7G
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -340,7 +340,7 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
                 if(cache_mode):tmp_x3=dq(tmp_x3[0],if_half,cache_mode,tmp_x3[1],tmp_x3[2],tmp_x3[3])
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean0)
                 if(cache_mode):tmp_x2=dq(tmp_x2[0],if_half,cache_mode,tmp_x2[1],tmp_x2[2],tmp_x2[3])
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -356,7 +356,7 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
                 if(cache_mode):tmp_x4=dq(tmp_x4[0],if_half,cache_mode,tmp_x4[1],tmp_x4[2],tmp_x4[3])
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean1)
                 if(cache_mode):tmp_x1=dq(tmp_x1[0],if_half,cache_mode,tmp_x1[1],tmp_x1[2],tmp_x1[3])
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 if(cache_mode):x = dq(x[0], if_half, cache_mode,x[1], x[2], x[3])
                 del tmp_dict[i][j]
                 x = torch.add(x0, x)#x0是unet2的最终输出
@@ -364,8 +364,8 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
         del tmp_dict
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*2,:w0*2]
-        return res#
-    def forward_gap_sync(self, x,tile_mode,alpha):#1.7G
+        return res
+    def forward_gap_sync(self, x,tile_mode,alpha):
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -386,11 +386,11 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
             else:
                 crop_size_h=((h0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//2*2+2#能被2整除
-            crop_size=(crop_size_h,crop_size_w)#6.6G
+            crop_size=(crop_size_h,crop_size_w)
         elif(tile_mode>=2):#hw都减半
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#5.6G
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -459,7 +459,7 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1)
                 tmp_x2,tmp_x3=self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -480,13 +480,13 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
                 tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 x_crop = torch.add(x0, x_crop)
                 res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*2,:w0*2]
-        return res#
-    def forward_fast_rough(self, x,tile_mode,alpha):#1.7G
+        return res
+    def forward_fast_rough(self, x,tile_mode,alpha):
         n, c, h0, w0 = x.shape
         if ("Half" in x.type()):if_half=True
         else:if_half=False
@@ -495,7 +495,7 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#3.7G
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(18,18+pw-w0,18,18+ph-h0),'reflect')
@@ -547,18 +547,18 @@ class UpCunet2x(nn.Module):#完美tile，全程无损
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2/n_patch)
                 tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3/n_patch)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 x_crop = torch.add(x0, x_crop)
                 res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*2,:w0*2]
-        return res#
-class UpCunet3x(nn.Module):#完美tile，全程无损
+        return res
+class UpCunet3x(nn.Module):
     def __init__(self, in_channels=3, out_channels=3):
         super(UpCunet3x, self).__init__()
         self.unet1 = UNet1x3(in_channels, out_channels, deconv=True)
         self.unet2 = UNet2(in_channels, out_channels, deconv=False)
-    def forward(self, x,tile_mode,cache_mode,alpha):#1.7G
+    def forward(self, x,tile_mode,cache_mode,alpha):
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -579,11 +579,11 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
             else:
                 crop_size_h=((h0-1)//8*8+8)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//4*4+4#能被2整除
-            crop_size=(crop_size_h,crop_size_w)#6.6G
+            crop_size=(crop_size_h,crop_size_w)
         elif (tile_mode >= 2):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  # 5.6G
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -652,7 +652,7 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
                 if(cache_mode):tmp_x3=dq(tmp_x3[0],if_half,cache_mode,tmp_x3[1],tmp_x3[2],tmp_x3[3])
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean0)
                 if(cache_mode):tmp_x2=dq(tmp_x2[0],if_half,cache_mode,tmp_x2[1],tmp_x2[2],tmp_x2[3])
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -668,7 +668,7 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
                 if(cache_mode):tmp_x4=dq(tmp_x4[0],if_half,cache_mode,tmp_x4[1],tmp_x4[2],tmp_x4[3])
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean1)
                 if(cache_mode):tmp_x1=dq(tmp_x1[0],if_half,cache_mode,tmp_x1[1],tmp_x1[2],tmp_x1[3])
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 if(cache_mode):x = dq(x[0], if_half, cache_mode,x[1], x[2], x[3])
                 del tmp_dict[i][j]
                 x = torch.add(x0, x)#x0是unet2的最终输出
@@ -676,8 +676,8 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
         del tmp_dict
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*3,:w0*3]
-        return res#
-    def forward_gap_sync(self, x,tile_mode,alpha):#1.7G
+        return res
+    def forward_gap_sync(self, x,tile_mode,alpha):
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -698,11 +698,11 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
             else:
                 crop_size_h=((h0-1)//8*8+8)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//4*4+4#能被2整除
-            crop_size=(crop_size_h,crop_size_w)#6.6G
+            crop_size=(crop_size_h,crop_size_w)
         elif (tile_mode >= 2):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  # 5.6G
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -788,15 +788,15 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 x_crop = torch.add(x0, x_crop)
                 res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*3,:w0*3]
-        return res#
-    def forward_fast_rough(self, x,tile_mode,alpha):#1.7G
+        return res
+    def forward_fast_rough(self, x,tile_mode,alpha):
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -805,7 +805,7 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  # 5.6G
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(14,14+pw-w0,14,14+ph-h0),'reflect')
@@ -855,15 +855,15 @@ class UpCunet3x(nn.Module):#完美tile，全程无损
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1/n_patch)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2/n_patch)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3/n_patch)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 x_crop = torch.add(x0, x_crop)
                 res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*3,:w0*3]
-        return res#
-class UpCunet4x(nn.Module):#完美tile，全程无损
+        return res
+class UpCunet4x(nn.Module):
     def __init__(self, in_channels=3, out_channels=3):
         super(UpCunet4x, self).__init__()
         self.unet1 = UNet1(in_channels, 64, deconv=True)
@@ -896,11 +896,11 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
             else:
                 crop_size_h=((h0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//2*2+2#能被2整除
-            crop_size=(crop_size_h,crop_size_w)#6.6G
+            crop_size=(crop_size_h,crop_size_w)
         elif (tile_mode >= 2):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t2 = tile_mode * 2
-            crop_size = (((h0 - 1) // t2 * t2 + t2) // tile_mode, ((w0 - 1) // t2 * t2 + t2) // tile_mode)  # 3.7G
+            crop_size = (((h0 - 1) // t2 * t2 + t2) // tile_mode, ((w0 - 1) // t2 * t2 + t2) // tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -969,7 +969,7 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
                 if(cache_mode):tmp_x3=dq(tmp_x3[0],if_half,cache_mode,tmp_x3[1],tmp_x3[2],tmp_x3[3])
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean0)
                 if(cache_mode):tmp_x2=dq(tmp_x2[0],if_half,cache_mode,tmp_x2[1],tmp_x2[2],tmp_x2[3])
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -985,7 +985,7 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
                 if(cache_mode):tmp_x4=dq(tmp_x4[0],if_half,cache_mode,tmp_x4[1],tmp_x4[2],tmp_x4[3])
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean1)
                 if(cache_mode):tmp_x1=dq(tmp_x1[0],if_half,cache_mode,tmp_x1[1],tmp_x1[2],tmp_x1[3])
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 del tmp_x1,tmp_x4
                 if(cache_mode):x = dq(x[0], if_half, cache_mode,x[1], x[2], x[3])
                 del tmp_dict[i][j]
@@ -1000,8 +1000,8 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
         del tmp_dict
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*4,:w0*4]
-        return res#
-    def forward_gap_sync(self, x,tile_mode,alpha):#1.7G
+        return res
+    def forward_gap_sync(self, x,tile_mode,alpha):
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -1027,11 +1027,11 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
             else:
                 crop_size_h=((h0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//2*2+2#能被2整除
-            crop_size=(crop_size_h,crop_size_w)#6.6G
+            crop_size=(crop_size_h,crop_size_w)
         elif(tile_mode>=2):#hw都减半
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#5.6G
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -1117,9 +1117,9 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 x_crop = torch.add(x0, x_crop)
                 x_crop=self.conv_final(x_crop)
                 x_crop = F.pad(x_crop, (-1, -1, -1, -1))
@@ -1130,8 +1130,8 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
                 res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x_crop*255).round().clamp_(0, 255).byte().cpu()
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*4,:w0*4]
-        return res#
-    def forward_fast_rough(self, x,tile_mode,alpha):#1.7G
+        return res
+    def forward_fast_rough(self, x,tile_mode,alpha):
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -1141,7 +1141,7 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#5.6G
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(19,19+pw-w0,19,19+ph-h0),'reflect')
@@ -1191,9 +1191,9 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1/n_patch)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2/n_patch)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3/n_patch)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
                 x_crop = torch.add(x0, x_crop)
                 x_crop=self.conv_final(x_crop)
                 x_crop = F.pad(x_crop, (-1, -1, -1, -1))
@@ -1204,7 +1204,7 @@ class UpCunet4x(nn.Module):#完美tile，全程无损
                 res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x_crop*255).round().clamp_(0, 255).byte().cpu()
         torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*4,:w0*4]
-        return res#
+        return res
 class RealWaifuUpScaler(object):
     def __init__(self,scale,weight_path,half,device):
         weight = torch.load(weight_path, map_location="cpu")
@@ -1233,6 +1233,7 @@ class RealWaifuUpScaler(object):
             else:
                 result = self.tensor2np(self.model(tensor,tile_mode,cache_mode,alpha))
         return result
+
 if __name__ == "__main__":
     ###########inference_img
     import time, cv2,sys,pdb
