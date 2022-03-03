@@ -35,7 +35,7 @@ class UpScalerMT(threading.Thread):
                 break
             self.res_q.put(self.inference(tmp))
 class VideoRealWaifuUpScaler(object):
-    def __init__(self,nt,n_gpu,scale,half,tile,cache_mode,alpha,p_sleep,decode_sleep,encode_params,cache_mode,alpha):
+    def __init__(self,nt,n_gpu,scale,half,tile,cache_mode,alpha,p_sleep,decode_sleep,encode_params):
         self.nt = nt
         self.n_gpu = n_gpu  # 每块GPU开nt个进程
         self.scale = scale
