@@ -44,7 +44,7 @@ https://user-images.githubusercontent.com/61866546/152800856-45bdee20-f7c7-443d-
 ### 2. For windows users
 Modify config.py, and double click go.bat to execute Real-CUGAN.
 - #### Executable file：
-    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tEr1) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) ｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### System environment：
     - :heavy_check_mark: Tested in windows10 64bit.
     - :heavy_check_mark: CPU with SSE4 and AVX support.
@@ -90,7 +90,7 @@ Please see [Readme](VapourSynth/README_EN.md)
 #### We support two weights for waifu2x-caffe users now:
 :fire: **Real-CUGAN2x standard version** and :fire: **Real-CUGAN2x no crop line version**
 <br>
-    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜[HecaiDrive(extract code:tEr1) :link:](https://caiyun.139.com/m/i?014MdMCVO9grI)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
+    [BaiduDrive(extract code:ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) ｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
     <br>
     Users can replace the original weights with the new ones (remember to backup the original weights if you want to reuse them), and use the original setting to super resolve images.<br>
 
