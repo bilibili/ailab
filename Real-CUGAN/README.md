@@ -8,6 +8,8 @@ Real Cascade U-Nets for Anime Image Super Resolution
 
 **Real-CUGAN** 为Windows用户打包了一个可执行环境。同时目前已有Windows-GUI与Web版本可使用。
 
+2022-05:我们一直在致力于修复模型过度锐化造成的ringing问题和纹理涂抹问题，会在5月放出Pro版本，敬请期待。
+
 [更新进展](https://github.com/bilibili/ailab/tree/main/Real-CUGAN#Acknowledgement)<br>
 2022-02-07:[Windows-GUI版](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)/[Web-CPU版](https://huggingface.co/spaces/mayhug/Real-CUGAN)<br>
 2022-02-09:[Colab示例代码](https://github.com/bilibili/ailab/blob/main/Real-CUGAN/colab-demo.ipynb)<br>
@@ -50,7 +52,6 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
     [百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN) | [和彩云(提取码1RHQ,手机号验证码登录,不限速无需客户端) :link:](https://caiyun.139.com/m/i?015CHx2VU4RNd)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)
 - #### 系统环境：
     - :heavy_check_mark: 在win10-64bit系统下进行测试
-    - :heavy_check_mark: CPU需支持SSE4和AVX(大部分现代CPU都已经支持;如果用N卡跑，不需要支持)
     - :heavy_check_mark: 小包需求系统cuda >= 10.0. 【大包需求系统cuda >= 11.1】
     - :heavy_check_mark: 只支持N卡或CPU，N卡需要至少1.5G显存
     - :heavy_exclamation_mark: **注意30系列 nvidia GPU 只能用大包；<20系建议用小包**
@@ -72,7 +73,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
         >  **1:** 对长边平分切成两块推理<br>
         >  **x:** 宽高分别平分切成x块推理<br>
         >  **auto:** 当输入图片文件夹图片分辨率不同时，填写auto自动调节不同图片tile模式，未来将支持该模式。
-    - alpha: 该值越小AI修复程度、痕迹越小，越模糊；alpha越大处理越烈，越锐化，色偏（对比度、饱和度增强）越大；默认为1不调整，推荐调整区间(0.7,1.3)；
+    - alpha: 该值越大AI修复程度、痕迹越小，越模糊；alpha越小处理越烈，越锐化，色偏（对比度、饱和度增强）越大；默认为1不调整，推荐调整区间(0.7,1.3)；
     - half: 半精度推理，>=20系显卡直接写True开着就好
     - :heavy_exclamation_mark: 如果使用windows路径，建议在双引号前加r
   
@@ -86,7 +87,7 @@ https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-
 - #### 模型分类说明：
 	 - 降噪版：如果原片噪声多，压得烂，推荐使用；目前2倍模型支持了3个降噪等级；
 	 - 无降噪版：如果原片噪声不多，压得还行，但是想提高分辨率/清晰度/做通用性的增强、修复处理，推荐使用；
-	 - 保守版：如果你担心丢失纹理，担心画风被改变，担心颜色被增强，总之就是各种担心AI会留下浓重的处理痕迹，推荐使用该版本。
+	 - 保守版：如果你担心丢失纹理，担心画风被改变，担心颜色被增强，总之就是各种担心AI会留下浓重的处理痕迹，推荐使用该版本；但对于较模糊、渣清的视频，修复程度不会比降噪版更好。
 
 ### 3. Python玩家
 环境依赖 <br>
