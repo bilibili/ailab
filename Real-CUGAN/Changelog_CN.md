@@ -1,0 +1,3 @@
+新模型是有的，UP疯狂编写中……
+
+The author is working overtime to write the changelog of Real-CUGAN-Pro,  please wait for a moment _(:3」∠)_  _(:3」∠)_  _(:3」∠)_
