@@ -651,9 +651,6 @@ class UpCunet2x_fast(nn.Module):#完美tile，全程无损
             x1 = F.pad(x, (-20, -20, -20, -20))
             x = torch.add(x0, x1)
             x=self.conv_final(x)
-            # with open(r"C:\Users\liujing\Desktop\log.txt","a+")as f:
-            #     f.write("%s"%(str(x.shape)))
-            #     f.flush()
             x=F.pad(x,(-1,-1,-1,-1))
             x=self.ps(x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 2, :w0 * 2]
