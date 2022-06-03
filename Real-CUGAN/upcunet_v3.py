@@ -1,4 +1,10 @@
-import torch
+'''
+cache_mode:
+0:使用cache缓存必要参数
+1:使用cache缓存必要参数，对cache进行8bit量化节省显存，带来小许延时增长
+2:不使用cache，耗时约为mode0的2倍，但是显存不受输入图像分辨率限制，tile_mode填得够大，1.5G显存可超任意比例
+'''
+import torch,pdb
 from torch import nn as nn
 from torch.nn import functional as F
 import os,sys
@@ -212,7 +218,7 @@ class UNet2(nn.Module):
         z = self.conv_bottom(x5)
         return z
 
-    def forward_a(self, x):
+    def forward_a(self, x):#conv234结尾有se
         x1 = self.conv1(x)
         x2 = self.conv1_down(x1)
         x1 = F.pad(x1, (-16, -16, -16, -16))
@@ -220,25 +226,25 @@ class UNet2(nn.Module):
         x2 = self.conv2.conv(x2)
         return x1,x2
 
-    def forward_b(self, x2):
+    def forward_b(self, x2):  # conv234结尾有se
         x3 = self.conv2_down(x2)
         x2 = F.pad(x2, (-4, -4, -4, -4))
         x3 = F.leaky_relu(x3, 0.1, inplace=True)
         x3 = self.conv3.conv(x3)
         return x2,x3
 
-    def forward_c(self, x2,x3):
+    def forward_c(self, x2,x3):  # conv234结尾有se
         x3 = self.conv3_up(x3)
         x3 = F.leaky_relu(x3, 0.1, inplace=True)
         x4 = self.conv4.conv(x2 + x3)
         return x4
 
-    def forward_d(self, x1,x4,alpha):
-        x4*=alpha
+    def forward_d(self, x1,x4):  # conv234结尾有se
         x4 = self.conv4_up(x4)
         x4 = F.leaky_relu(x4, 0.1, inplace=True)
         x5 = self.conv5(x1 + x4)
         x5 = F.leaky_relu(x5, 0.1, inplace=True)
+
         z = self.conv_bottom(x5)
         return z
 class UpCunet2x(nn.Module):
@@ -259,7 +265,7 @@ class UpCunet2x(nn.Module):
             x = F.pad(x, (-20, -20, -20, -20))
             x = torch.add(x0, x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 2, :w0 * 2]
-            return (x*255).round().clamp_(0, 255).byte().cpu()
+            return (x*255).round().clamp_(0, 255).byte()
         elif(tile_mode==1):# 对长边减半
             if(w0>=h0):
                 crop_size_w=((w0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
@@ -275,6 +281,7 @@ class UpCunet2x(nn.Module):
         else:
             print("tile_mode config error")
             os._exit(233)
+
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(18,18+pw-w0,18,18+ph-h0),'reflect')
@@ -340,7 +347,7 @@ class UpCunet2x(nn.Module):
                 if(cache_mode):tmp_x3=dq(tmp_x3[0],if_half,cache_mode,tmp_x3[1],tmp_x3[2],tmp_x3[3])
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean0)
                 if(cache_mode):tmp_x2=dq(tmp_x2[0],if_half,cache_mode,tmp_x2[1],tmp_x2[2],tmp_x2[3])
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -349,20 +356,20 @@ class UpCunet2x(nn.Module):
                 se_mean1+=tmp_se_mean
                 tmp_dict[i][j]=(opt_unet1,tmp_x1,tmp_x4)
         se_mean1/=n_patch
-        res = torch.zeros((n, c, h * 2 - 72, w * 2 - 72),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 2 - 72, w * 2 - 72),dtype=torch.uint8,device=x.device)
         for i in range(0,h-36,crop_size[0]):
             for j in range(0,w-36,crop_size[1]):
                 x,tmp_x1, tmp_x4=tmp_dict[i][j]
                 if(cache_mode):tmp_x4=dq(tmp_x4[0],if_half,cache_mode,tmp_x4[1],tmp_x4[2],tmp_x4[3])
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean1)
                 if(cache_mode):tmp_x1=dq(tmp_x1[0],if_half,cache_mode,tmp_x1[1],tmp_x1[2],tmp_x1[3])
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 if(cache_mode):x = dq(x[0], if_half, cache_mode,x[1], x[2], x[3])
                 del tmp_dict[i][j]
                 x = torch.add(x0, x)#x0是unet2的最终输出
-                res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x*255).round().clamp_(0, 255).byte().cpu()
+                res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x*255).round().clamp_(0, 255).byte()
         del tmp_dict
-        torch.cuda.empty_cache()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*2,:w0*2]
         return res
     def forward_gap_sync(self, x,tile_mode,alpha):
@@ -378,7 +385,7 @@ class UpCunet2x(nn.Module):
             x = F.pad(x, (-20, -20, -20, -20))
             x = torch.add(x0, x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 2, :w0 * 2]
-            return (x*255).round().clamp_(0, 255).byte().cpu()
+            return (x*255).round().clamp_(0, 255).byte()
         elif(tile_mode==1):# 对长边减半
             if(w0>=h0):
                 crop_size_w=((w0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
@@ -386,7 +393,7 @@ class UpCunet2x(nn.Module):
             else:
                 crop_size_h=((h0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
                 crop_size_w=(w0-1)//2*2+2#能被2整除
-            crop_size=(crop_size_h,crop_size_w)
+            crop_size=(crop_size_h,crop_size_w)#6.6G
         elif(tile_mode>=2):#hw都减半
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t2=tile_mode*2
@@ -441,7 +448,7 @@ class UpCunet2x(nn.Module):
                 tmp_x2,tmp_x3=self.unet2.forward_b(tmp_x2)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x3.float(), dim=(2, 3),keepdim=True).half()
-                else:#
+                else:
                     tmp_se_mean = torch.mean(tmp_x3, dim=(2, 3),keepdim=True)
                 se_mean2+=tmp_se_mean
         se_mean2/=n_patch
@@ -459,7 +466,7 @@ class UpCunet2x(nn.Module):
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1)
                 tmp_x2,tmp_x3=self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -467,7 +474,7 @@ class UpCunet2x(nn.Module):
                 se_mean3+=tmp_se_mean
         se_mean3/=n_patch
         ###########stage1+state2+state3+stage4+stage_tail
-        res = torch.zeros((n, c, h * 2 - 72, w * 2 - 72),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 2 - 72, w * 2 - 72),dtype=torch.uint8,device=x.device)
         for i in range(0,h-36,crop_size[0]):
             for j in range(0,w-36,crop_size[1]):
                 tmp0,x_crop = self.unet1.forward_a(x[:,:,i:i+crop_size[0]+36,j:j+crop_size[1]+36])
@@ -480,10 +487,10 @@ class UpCunet2x(nn.Module):
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
                 tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 x_crop = torch.add(x0, x_crop)
-                res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
-        torch.cuda.empty_cache()
+                res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x_crop* 255.0).round().clamp_(0, 255).byte()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*2,:w0*2]
         return res
     def forward_fast_rough(self, x,tile_mode,alpha):
@@ -534,7 +541,7 @@ class UpCunet2x(nn.Module):
                 else:se_mean3 += torch.mean(tmp_x4, dim=(2, 3),keepdim=True)
         # print("2x-n_patch=%s,tile_mode=%s" % (n_patch,tile_mode))
         ###########stage1+state2+state3+stage4+stage_tail
-        res = torch.zeros((n, c, h * 2 - 72, w * 2 - 72),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 2 - 72, w * 2 - 72),dtype=torch.uint8,device=x.device)
         for i in range(0,h-36,crop_size[0]):
             for j in range(0,w-36,crop_size[1]):
                 tmp0,x_crop = self.unet1.forward_a(x[:,:,i:i+crop_size[0]+36,j:j+crop_size[1]+36])
@@ -547,10 +554,10 @@ class UpCunet2x(nn.Module):
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2/n_patch)
                 tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3/n_patch)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 x_crop = torch.add(x0, x_crop)
-                res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
-        torch.cuda.empty_cache()
+                res[:, :, i * 2:i * 2 + h1 * 2 - 72, j * 2:j * 2 + w1 * 2 - 72] = (x_crop* 255.0).round().clamp_(0, 255).byte()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*2,:w0*2]
         return res
 class UpCunet3x(nn.Module):
@@ -571,7 +578,7 @@ class UpCunet3x(nn.Module):
             x = F.pad(x, (-20, -20, -20, -20))
             x = torch.add(x0, x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 3, :w0 * 3]
-            return (x*255).round().clamp_(0, 255).byte().cpu()
+            return (x*255).round().clamp_(0, 255).byte()
         elif(tile_mode==1):# 对长边减半
             if(w0>=h0):
                 crop_size_w=((w0-1)//8*8+8)//2#减半后能被2整除，所以要先被4整除
@@ -652,7 +659,7 @@ class UpCunet3x(nn.Module):
                 if(cache_mode):tmp_x3=dq(tmp_x3[0],if_half,cache_mode,tmp_x3[1],tmp_x3[2],tmp_x3[3])
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean0)
                 if(cache_mode):tmp_x2=dq(tmp_x2[0],if_half,cache_mode,tmp_x2[1],tmp_x2[2],tmp_x2[3])
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -661,20 +668,20 @@ class UpCunet3x(nn.Module):
                 se_mean1+=tmp_se_mean
                 tmp_dict[i][j]=(opt_unet1,tmp_x1,tmp_x4)
         se_mean1/=n_patch
-        res = torch.zeros((n, c, h * 3 - 84, w * 3 - 84),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 3 - 84, w * 3 - 84),dtype=torch.uint8,device=x.device)
         for i in range(0,h-28,crop_size[0]):
             for j in range(0,w-28,crop_size[1]):
                 x,tmp_x1, tmp_x4=tmp_dict[i][j]
                 if(cache_mode):tmp_x4=dq(tmp_x4[0],if_half,cache_mode,tmp_x4[1],tmp_x4[2],tmp_x4[3])
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean1)
                 if(cache_mode):tmp_x1=dq(tmp_x1[0],if_half,cache_mode,tmp_x1[1],tmp_x1[2],tmp_x1[3])
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 if(cache_mode):x = dq(x[0], if_half, cache_mode,x[1], x[2], x[3])
                 del tmp_dict[i][j]
                 x = torch.add(x0, x)#x0是unet2的最终输出
-                res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x*255).round().clamp_(0, 255).byte().cpu()
+                res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x*255).round().clamp_(0, 255).byte()
         del tmp_dict
-        torch.cuda.empty_cache()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*3,:w0*3]
         return res
     def forward_gap_sync(self, x,tile_mode,alpha):
@@ -690,7 +697,7 @@ class UpCunet3x(nn.Module):
             x = F.pad(x, (-20, -20, -20, -20))
             x = torch.add(x0, x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 3, :w0 * 3]
-            return (x*255).round().clamp_(0, 255).byte().cpu()
+            return (x*255).round().clamp_(0, 255).byte()
         elif(tile_mode==1):# 对长边减半
             if(w0>=h0):
                 crop_size_w=((w0-1)//8*8+8)//2#减半后能被2整除，所以要先被4整除
@@ -702,7 +709,7 @@ class UpCunet3x(nn.Module):
         elif (tile_mode >= 2):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -753,7 +760,7 @@ class UpCunet3x(nn.Module):
                 tmp_x2,tmp_x3=self.unet2.forward_b(tmp_x2)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x3.float(), dim=(2, 3),keepdim=True).half()
-                else:#
+                else:
                     tmp_se_mean = torch.mean(tmp_x3, dim=(2, 3),keepdim=True)
                 se_mean2+=tmp_se_mean
         se_mean2/=n_patch
@@ -777,7 +784,7 @@ class UpCunet3x(nn.Module):
                 se_mean3+=tmp_se_mean
         se_mean3/=n_patch
         ###########stage1+state2+state3+stage4+stage_tail
-        res = torch.zeros((n, c, h * 3 - 84, w * 3 - 84),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 3 - 84, w * 3 - 84),dtype=torch.uint8,device=x.device)
         for i in range(0,h-28,crop_size[0]):
             for j in range(0,w-28,crop_size[1]):
                 tmp0,x_crop = self.unet1.forward_a(x[:,:,i:i+crop_size[0]+28,j:j+crop_size[1]+28])
@@ -788,15 +795,17 @@ class UpCunet3x(nn.Module):
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 x_crop = torch.add(x0, x_crop)
-                res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
-        torch.cuda.empty_cache()
+                # x_crop=(x_crop-0.15)/0.7
+                # x_crop*=0.91
+                res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x_crop* 255.0).round().clamp_(0, 255).byte()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*3,:w0*3]
         return res
-    def forward_fast_rough(self, x,tile_mode,alpha):
+    def forward_fast_rough(self, x,tile_mode,alpha):#1.7G
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -805,7 +814,7 @@ class UpCunet3x(nn.Module):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  # 5.6G
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(14,14+pw-w0,14,14+ph-h0),'reflect')
@@ -844,7 +853,7 @@ class UpCunet3x(nn.Module):
                 else:se_mean3 += torch.mean(tmp_x4, dim=(2, 3),keepdim=True)
         # print("3x-n_patch=%s,tile_mode=%s" % (n_patch,tile_mode))
         ###########stage1+state2+state3+stage4+stage_tail
-        res = torch.zeros((n, c, h * 3 - 84, w * 3 - 84),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 3 - 84, w * 3 - 84),dtype=torch.uint8,device=x.device)
         for i in range(0,h-28,crop_size[0]):
             for j in range(0,w-28,crop_size[1]):
                 tmp0,x_crop = self.unet1.forward_a(x[:,:,i:i+crop_size[0]+28,j:j+crop_size[1]+28])
@@ -855,12 +864,12 @@ class UpCunet3x(nn.Module):
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1/n_patch)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2/n_patch)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3/n_patch)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 x_crop = torch.add(x0, x_crop)
-                res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x_crop* 255.0).round().clamp_(0, 255).byte().cpu()
-        torch.cuda.empty_cache()
+                res[:, :, i * 3:i * 3 + h1 * 3 - 84, j * 3:j * 3 + w1 * 3 - 84] = (x_crop* 255.0).round().clamp_(0, 255).byte()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*3,:w0*3]
         return res
 class UpCunet4x(nn.Module):
@@ -888,7 +897,7 @@ class UpCunet4x(nn.Module):
             x=self.ps(x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 4, :w0 * 4]
             x+=F.interpolate(x00, scale_factor=4, mode='nearest')
-            return (x*255).round().clamp_(0, 255).byte().cpu()
+            return (x*255).round().clamp_(0, 255).byte()
         elif(tile_mode==1):# 对长边减半
             if(w0>=h0):
                 crop_size_w=((w0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
@@ -969,7 +978,7 @@ class UpCunet4x(nn.Module):
                 if(cache_mode):tmp_x3=dq(tmp_x3[0],if_half,cache_mode,tmp_x3[1],tmp_x3[2],tmp_x3[3])
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean0)
                 if(cache_mode):tmp_x2=dq(tmp_x2[0],if_half,cache_mode,tmp_x2[1],tmp_x2[2],tmp_x2[3])
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x4.float(), dim=(2, 3),keepdim=True).half()
                 else:
@@ -978,14 +987,14 @@ class UpCunet4x(nn.Module):
                 se_mean1+=tmp_se_mean
                 tmp_dict[i][j]=(opt_unet1,tmp_x1,tmp_x4)
         se_mean1/=n_patch
-        res = torch.zeros((n, c, h * 4 - 152, w * 4 - 152),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 4 - 152, w * 4 - 152),dtype=torch.uint8,device=x.device)
         for i in range(0,h-38,crop_size[0]):
             for j in range(0,w-38,crop_size[1]):
                 x,tmp_x1, tmp_x4=tmp_dict[i][j]
                 if(cache_mode):tmp_x4=dq(tmp_x4[0],if_half,cache_mode,tmp_x4[1],tmp_x4[2],tmp_x4[3])
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean1)
                 if(cache_mode):tmp_x1=dq(tmp_x1[0],if_half,cache_mode,tmp_x1[1],tmp_x1[2],tmp_x1[3])
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 del tmp_x1,tmp_x4
                 if(cache_mode):x = dq(x[0], if_half, cache_mode,x[1], x[2], x[3])
                 del tmp_dict[i][j]
@@ -996,9 +1005,9 @@ class UpCunet4x(nn.Module):
                 x00_crop=x00[:, :, i:i + h1 - 38, j:j + w1 - 38]
                 _,_,h2,w2=x00_crop.shape
                 x[:,:,:h2*4,:w2*4]+=F.interpolate(x00_crop, scale_factor=4, mode='nearest')
-                res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x*255).round().clamp_(0, 255).byte().cpu()
+                res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x*255).round().clamp_(0, 255).byte()
         del tmp_dict
-        torch.cuda.empty_cache()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*4,:w0*4]
         return res
     def forward_gap_sync(self, x,tile_mode,alpha):
@@ -1019,7 +1028,7 @@ class UpCunet4x(nn.Module):
             x=self.ps(x)
             if (w0 != pw or h0 != ph): x = x[:, :, :h0 * 4, :w0 * 4]
             x+=F.interpolate(x00, scale_factor=4, mode='nearest')
-            return (x*255).round().clamp_(0, 255).byte().cpu()
+            return (x*255).round().clamp_(0, 255).byte()
         elif(tile_mode==1):# 对长边减半
             if(w0>=h0):
                 crop_size_w=((w0-1)//4*4+4)//2#减半后能被2整除，所以要先被4整除
@@ -1031,7 +1040,7 @@ class UpCunet4x(nn.Module):
         elif(tile_mode>=2):#hw都减半
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#5.6G
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -1082,7 +1091,7 @@ class UpCunet4x(nn.Module):
                 tmp_x2,tmp_x3=self.unet2.forward_b(tmp_x2)
                 if(if_half):  # torch.HalfTensor/torch.cuda.HalfTensor
                     tmp_se_mean = torch.mean(tmp_x3.float(), dim=(2, 3),keepdim=True).half()
-                else:#
+                else:
                     tmp_se_mean = torch.mean(tmp_x3, dim=(2, 3),keepdim=True)
                 se_mean2+=tmp_se_mean
         se_mean2/=n_patch
@@ -1106,7 +1115,7 @@ class UpCunet4x(nn.Module):
                 se_mean3+=tmp_se_mean
         se_mean3/=n_patch
         ###########stage1+state2+state3+stage4+stage_tail
-        res = torch.zeros((n, c, h * 4 - 152, w * 4 - 152),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 4 - 152, w * 4 - 152),dtype=torch.uint8,device=x.device)
         for i in range(0,h-38,crop_size[0]):
             for j in range(0,w-38,crop_size[1]):
                 tmp0,x_crop = self.unet1.forward_a(x[:,:,i:i+crop_size[0]+38,j:j+crop_size[1]+38])
@@ -1117,9 +1126,9 @@ class UpCunet4x(nn.Module):
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 x_crop = torch.add(x0, x_crop)
                 x_crop=self.conv_final(x_crop)
                 x_crop = F.pad(x_crop, (-1, -1, -1, -1))
@@ -1127,11 +1136,11 @@ class UpCunet4x(nn.Module):
                 x00_crop=x00[:, :, i:i + h1 - 38, j:j + w1 - 38]
                 _,_,h2,w2=x00_crop.shape
                 x_crop[:,:,:h2*4,:w2*4]+=F.interpolate(x00_crop, scale_factor=4, mode='nearest')
-                res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x_crop*255).round().clamp_(0, 255).byte().cpu()
-        torch.cuda.empty_cache()
+                res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x_crop*255).round().clamp_(0, 255).byte()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*4,:w0*4]
         return res
-    def forward_fast_rough(self, x,tile_mode,alpha):
+    def forward_fast_rough(self, x,tile_mode,alpha):#1.7G
         n, c, h0, w0 = x.shape
         if("Half" in x.type()):if_half=True
         else:if_half=False
@@ -1141,7 +1150,7 @@ class UpCunet4x(nn.Module):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
             t2=tile_mode*2
-            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
+            crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)#5.6G
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(19,19+pw-w0,19,19+ph-h0),'reflect')
@@ -1180,7 +1189,7 @@ class UpCunet4x(nn.Module):
                 else:se_mean3 += torch.mean(tmp_x4, dim=(2, 3),keepdim=True)
         # print("4x-n_patch=%s,tile_mode=%s" % (n_patch,tile_mode))
         ###########stage1+state2+state3+stage4+stage_tail
-        res = torch.zeros((n, c, h * 4 - 152, w * 4 - 152),dtype=torch.uint8,device="cpu")
+        res = torch.zeros((n, c, h * 4 - 152, w * 4 - 152),dtype=torch.uint8,device=x.device)
         for i in range(0,h-38,crop_size[0]):
             for j in range(0,w-38,crop_size[1]):
                 tmp0,x_crop = self.unet1.forward_a(x[:,:,i:i+crop_size[0]+38,j:j+crop_size[1]+38])
@@ -1191,9 +1200,9 @@ class UpCunet4x(nn.Module):
                 tmp_x2=self.unet2.conv2.seblock.forward_mean(tmp_x2,se_mean1/n_patch)
                 tmp_x2, tmp_x3 = self.unet2.forward_b(tmp_x2)
                 tmp_x3=self.unet2.conv3.seblock.forward_mean(tmp_x3,se_mean2/n_patch)
-                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)
+                tmp_x4=self.unet2.forward_c(tmp_x2,tmp_x3)*alpha
                 tmp_x4=self.unet2.conv4.seblock.forward_mean(tmp_x4,se_mean3/n_patch)
-                x0=self.unet2.forward_d(tmp_x1,tmp_x4,alpha)
+                x0=self.unet2.forward_d(tmp_x1,tmp_x4)
                 x_crop = torch.add(x0, x_crop)
                 x_crop=self.conv_final(x_crop)
                 x_crop = F.pad(x_crop, (-1, -1, -1, -1))
@@ -1201,13 +1210,15 @@ class UpCunet4x(nn.Module):
                 x00_crop=x00[:, :, i:i + h1 - 38, j:j + w1 - 38]
                 _,_,h2,w2=x00_crop.shape
                 x_crop[:,:,:h2*4,:w2*4]+=F.interpolate(x00_crop, scale_factor=4, mode='nearest')
-                res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x_crop*255).round().clamp_(0, 255).byte().cpu()
-        torch.cuda.empty_cache()
+                res[:, :, i * 4:i * 4 + h1 * 4 - 152, j * 4:j * 4 + w1 * 4 - 152] = (x_crop*255).round().clamp_(0, 255).byte()
+        #torch.cuda.empty_cache()
         if(w0!=pw or h0!=ph):res=res[:,:,:h0*4,:w0*4]
         return res
 class RealWaifuUpScaler(object):
     def __init__(self,scale,weight_path,half,device):
         weight = torch.load(weight_path, map_location="cpu")
+        self.pro="pro"in weight
+        if(self.pro):del weight["pro"]
         self.model=eval("UpCunet%sx"%scale)()
         if(half==True):self.model=self.model.half().to(device)
         else:self.model=self.model.to(device)
@@ -1216,12 +1227,20 @@ class RealWaifuUpScaler(object):
         self.half=half
         self.device=device
 
-    def np2tensor(self,np_frame):
-        if (self.half == False):return torch.from_numpy(np.transpose(np_frame, (2, 0, 1))).unsqueeze(0).to(self.device).float() / 255
-        else:return torch.from_numpy(np.transpose(np_frame, (2, 0, 1))).unsqueeze(0).to(self.device).half() / 255
 
-    def tensor2np(self,tensor):#
-        return (np.transpose(tensor.squeeze().numpy(), (1, 2, 0)))
+    def np2tensor(self,np_frame):
+        if(self.pro):
+            if (self.half == False):return torch.from_numpy(np.transpose(np_frame, (2, 0, 1))).unsqueeze(0).to(self.device).float() / (255/0.7)+0.15
+            else:return torch.from_numpy(np.transpose(np_frame, (2, 0, 1))).unsqueeze(0).to(self.device).half() / (255/0.7)+0.15
+        else:
+            if (self.half == False):return torch.from_numpy(np.transpose(np_frame, (2, 0, 1))).unsqueeze(0).to(self.device).float() / 255
+            else:return torch.from_numpy(np.transpose(np_frame, (2, 0, 1))).unsqueeze(0).to(self.device).half() / 255
+
+    def tensor2np(self,tensor):
+        if(self.pro):
+            return (np.transpose(((tensor-0.15)/0.7).squeeze().cpu().numpy(), (1, 2, 0)))
+        else:
+            return (np.transpose(tensor.squeeze().cpu().numpy(), (1, 2, 0)))
 
     def __call__(self, frame,tile_mode,cache_mode,alpha):
         with torch.no_grad():
@@ -1238,17 +1257,14 @@ if __name__ == "__main__":
     ###########inference_img
     import time, cv2,sys,pdb
     from time import time as ttime
-    for weight_path, scale in [("updated_weights/up2x-latest-denoise3x.pth", 2),("updated_weights/up3x-latest-denoise3x.pth", 3),("updated_weights/up4x-latest-denoise3x.pth", 4),]:
-        # for tile_mode in [15,12,9,6,3]:
+    for weight_path, scale in [("weights_v3/up2x-latest-denoise3x.pth", 2),("weights_v3/up3x-latest-denoise3x.pth", 3),("weights_v3/up4x-latest-denoise3x.pth", 4),("weights_pro/pro-denoise3x-up2x.pth", 2),("weights_pro/pro-denoise3x-up3x.pth", 3),]:
         for tile_mode in [0,5]:
             for cache_mode in [0,1,2,3]:
-                for alpha in [0.75,1,1.15,1.3]:
+                for alpha in [0.75,1,1.3]:
+                    weight_name=weight_path.split("/")[-1].split(".")[0]
                     upscaler2x = RealWaifuUpScaler(scale, weight_path, half=True, device="cuda:0")
-                    # input_dir="%s/huge-test"%root_path
-                    # input_dir="%s/input_dir1"%root_path
-                    input_dir="%s/input1080P"%root_path
-                    # output_dir="%s/opt-huge"%root_path
-                    output_dir="%s/opt-dir-all-test"%root_path
+                    input_dir="%s/inputs"%root_path
+                    output_dir="%s/output-dir-all-test"%root_path
                     os.makedirs(output_dir,exist_ok=True)
                     for name in os.listdir(input_dir):
                         print(name)
@@ -1265,15 +1281,13 @@ if __name__ == "__main__":
                         t0 = ttime()
                         result = upscaler2x(frame, tile_mode=tile_mode,cache_mode=cache_mode,alpha=alpha)[:, :, ::-1]
                         t1 = ttime()
-                        print(prefix, "done", t1 - t0,"tile_mode=%s"%tile_mode,"cache_mode=%s"%cache_mode,"alpha=%s"%alpha)
-                        # pdb.set_trace()
-                        # torch.cuda.empty_cache()
+                        print(prefix, "done", t1 - t0,"tile_mode=%s"%tile_mode,cache_mode)
                         tmp_opt_path = os.path.join(root_path, "tmp", "%s.%s" % (int(time.time() * 1000000), suffix))
                         cv2.imwrite(tmp_opt_path, result)
                         n=0
                         while (1):
-                            if (n == 0):suffix = "_%sx_tile%s_cache%s_alpha%s.jpg" % (scale, tile_mode, cache_mode, alpha)
-                            else:suffix = "_%sx_tile%s_cache%s_alpha%s_%s.jpg" % (scale, tile_mode, cache_mode, alpha, n)  #
+                            if (n == 0):suffix = "_%sx_tile%s_cache%s_alpha%s_%s.png" % (scale, tile_mode, cache_mode, alpha,weight_name)
+                            else:suffix = "_%sx_tile%s_cache%s_alpha%s_%s_%s.png" % (scale, tile_mode, cache_mode, alpha, weight_name,n)
                             if (os.path.exists(os.path.join(output_dir, prefix + suffix)) == False):break
                             else:n += 1
                         final_opt_path=os.path.join(output_dir, prefix + suffix)
