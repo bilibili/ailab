@@ -68,7 +68,7 @@
 
 
 
-使用方法：我会放出Pro模型参数（百度网盘/谷歌云盘/github release老链接），需要在config.py里面指定，同时下载新的upcunet_v3.py进行覆盖。(由于作者对4x新版模型效果不是很满意，暂时只放出2倍和3倍，每个倍率3个模型，conservative/no-denoise/denoise3x。
+使用方法：网盘老地址下载模型参数（[百度网盘(提取码ds2a) :link:](https://pan.baidu.com/s/10NbgnusDucllKiE0sgBWvQ)｜[GithubRelease :link:](https://github.com/bilibili/ailab/releases/tag/Real-CUGAN)｜ [GoogleDrive :link:](https://drive.google.com/drive/folders/1UFgpV14uEAcgYvVw0fJuajzy1k7JIz6H)），需要在config.py里面指定，同时下载新的upcunet_v3.py进行覆盖。(由于作者对4x新版模型效果不是很满意，暂时只放出2倍和3倍，每个倍率3个模型，conservative/no-denoise/denoise3x）
 
-<div align = "right">北京时间2022年5月31日 95时33分</div>
+<div align = "right">北京时间2022年5月35日 0时50分</div>
 
