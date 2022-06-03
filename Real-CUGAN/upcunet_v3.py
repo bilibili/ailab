@@ -702,7 +702,7 @@ class UpCunet3x(nn.Module):
         elif (tile_mode >= 2):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)
         else:
             print("tile_mode config error")
             os._exit(233)
@@ -805,7 +805,7 @@ class UpCunet3x(nn.Module):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
             if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
             t4 = tile_mode * 4
-            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)  
+            crop_size = (((h0 - 1) // t4 * t4 + t4) // tile_mode, ((w0 - 1) // t4 * t4 + t4) // tile_mode)
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
         pw = ((w0 - 1) // crop_size[1] + 1) * crop_size[1]
         x=F.pad(x,(14,14+pw-w0,14,14+ph-h0),'reflect')
@@ -1238,44 +1238,59 @@ if __name__ == "__main__":
     ###########inference_img
     import time, cv2,sys,pdb
     from time import time as ttime
-    for weight_path, scale in [("updated_weights/up2x-latest-denoise3x.pth", 2),("updated_weights/up3x-latest-denoise3x.pth", 3),("updated_weights/up4x-latest-denoise3x.pth", 4),]:
-        # for tile_mode in [15,12,9,6,3]:
-        for tile_mode in [0,5]:
-            for cache_mode in [0,1,2,3]:
-                for alpha in [0.75,1,1.15,1.3]:
-                    upscaler2x = RealWaifuUpScaler(scale, weight_path, half=True, device="cuda:0")
-                    # input_dir="%s/huge-test"%root_path
-                    # input_dir="%s/input_dir1"%root_path
-                    input_dir="%s/input1080P"%root_path
-                    # output_dir="%s/opt-huge"%root_path
-                    output_dir="%s/opt-dir-all-test"%root_path
-                    os.makedirs(output_dir,exist_ok=True)
-                    for name in os.listdir(input_dir):
-                        print(name)
-                        tmp = name.split(".")
-                        inp_path = os.path.join(input_dir, name)
-                        suffix = tmp[-1]
-                        prefix = ".".join(tmp[:-1])
-                        tmp_path = os.path.join(root_path, "tmp", "%s.%s" % (int(time.time() * 1000000), suffix))
-                        print(inp_path,tmp_path)
-                        #支持中文路径
-                        # os.link(inp_path, tmp_path)#win用硬链接
-                        os.symlink(inp_path, tmp_path)#linux用软链接
-                        frame = cv2.imread(tmp_path)[:, :, [2, 1, 0]]
-                        t0 = ttime()
-                        result = upscaler2x(frame, tile_mode=tile_mode,cache_mode=cache_mode,alpha=alpha)[:, :, ::-1]
-                        t1 = ttime()
-                        print(prefix, "done", t1 - t0,"tile_mode=%s"%tile_mode,"cache_mode=%s"%cache_mode,"alpha=%s"%alpha)
-                        # pdb.set_trace()
-                        # torch.cuda.empty_cache()
-                        tmp_opt_path = os.path.join(root_path, "tmp", "%s.%s" % (int(time.time() * 1000000), suffix))
-                        cv2.imwrite(tmp_opt_path, result)
-                        n=0
-                        while (1):
-                            if (n == 0):suffix = "_%sx_tile%s_cache%s_alpha%s.jpg" % (scale, tile_mode, cache_mode, alpha)
-                            else:suffix = "_%sx_tile%s_cache%s_alpha%s_%s.jpg" % (scale, tile_mode, cache_mode, alpha, n)  #
-                            if (os.path.exists(os.path.join(output_dir, prefix + suffix)) == False):break
-                            else:n += 1
-                        final_opt_path=os.path.join(output_dir, prefix + suffix)
-                        os.rename(tmp_opt_path,final_opt_path)
-                        os.remove(tmp_path)
+    config={}
+    with open("config.py", "r") as f:
+        lines = f.readlines()
+        for line in lines:
+            if line[0] == '#' or line[0] == "\n":
+                continue
+            else:
+                kvs = line.split("=")
+                k = kvs[0].strip()
+                v = kvs[1].strip()
+                v = v.split("#")[0]
+                if v[0] == '"':
+                    v = v[1:-1]
+                if v.isdigit():
+                    v = int(v)
+                if v == "True" or v == "False":
+                    v = bool(v)
+                config[k] = v
+    print(config)
+    scale = config["scale"]
+    weight_path = config["model_path%d"%scale]
+    half = config["half"]
+    device = config["device"]
+    tile_mode = config["tile"]
+    cache_mode = config["cache_mode"]
+    alpha = config["alpha"]
+    upscaler2x = RealWaifuUpScaler(scale, weight_path, half=half, device=device)
+    input_dir="%s/%s"%(root_path, config["input_dir"])
+    print(input_dir)
+    output_dir="%s/%s"%(root_path, config["output_dir"])
+    os.makedirs(output_dir,exist_ok=True)
+    for name in os.listdir(input_dir):
+        print(name)
+        tmp = name.split(".")
+        inp_path = os.path.join(input_dir, name)
+        suffix = tmp[-1]
+        prefix = ".".join(tmp[:-1])
+        tmp_path = os.path.join(root_path, "tmp", "%s.%s" % (int(time.time() * 1000000), suffix))
+        print(inp_path,tmp_path)
+        os.symlink(inp_path, tmp_path)#linux用软链接
+        frame = cv2.imread(tmp_path)[:, :, [2, 1, 0]]
+        t0 = ttime()
+        result = upscaler2x(frame, tile_mode=tile_mode,cache_mode=cache_mode,alpha=alpha)[:, :, ::-1]
+        t1 = ttime()
+        print(prefix, "done", t1 - t0,"tile_mode=%s"%tile_mode,"cache_mode=%s"%cache_mode,"alpha=%s"%alpha)
+        tmp_opt_path = os.path.join(root_path, "tmp", "%s.%s" % (int(time.time() * 1000000), suffix))
+        cv2.imwrite(tmp_opt_path, result)
+        n=0
+        while (1):
+            if (n == 0):suffix = "_%sx_tile%s_cache%s_alpha%s.jpg" % (scale, tile_mode, cache_mode, alpha)
+            else:suffix = "_%sx_tile%s_cache%s_alpha%s_%s.jpg" % (scale, tile_mode, cache_mode, alpha, n)  #
+            if (os.path.exists(os.path.join(output_dir, prefix + suffix)) == False):break
+            else:n += 1
+        final_opt_path=os.path.join(output_dir, prefix + suffix)
+        os.rename(tmp_opt_path,final_opt_path)
+        os.remove(tmp_path)
