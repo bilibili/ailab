@@ -12,14 +12,14 @@
 
 |               | 最大降噪强度                                                 | 不降噪                                                       |
 | ------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| RealCUGAN     | <img src="demos/crop-princess-red/d3-old.png" alt="old_d3" style="zoom:200%;" /> | <img src="demos/crop-princess-red/nod-old.png" alt="old_nod" style="zoom:200%;" /> |
-| RealCUGAN-Pro | <img src="demos/crop-princess-red/d3-new.png" alt="new_d3" style="zoom:200%;" /> | <img src="demos/crop-princess-red/nod-new.png" alt="new_nod" style="zoom:200%;" /> |
+| RealCUGAN     | <img src="demos/crop-princess-red/d3-old.png" width="400" /> | <img src="demos/crop-princess-red/nod-old.png" width="400" /> |
+| RealCUGAN-Pro | <img src="demos/crop-princess-red/d3-new.png" width="400" /> | <img src="demos/crop-princess-red/nod-new.png" width="400" /> |
 
 如果认为锐化过度，可以调高Alpha值降低锐化强度
 
 | 原图                                                         | 优化前：RealCUGAN-最大降噪强度                               | 优化后：RealCUGAN-Pro-最大降噪强度-Alpha1.4                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src="demos/crop-princess-red/ori-princess-crop.png" alt="ori" style="zoom:400%;" /> | <img src="demos/crop-princess/d3-old.png" alt="old_d3" style="zoom:200%;" /> | <img src="demos/crop-princess-red/new-d3-1d4-crop.png" alt="d3-a1.4" style="zoom:200%;" /> |
+| <img src="demos/crop-princess-red/ori-princess-crop.png" width="333" /> | <img src="demos/crop-princess/d3-old.png" width="333" /> | <img src="demos/crop-princess-red/new-d3-1d4-crop.png" alt="d3-a1.4" width="333" /> |
 
 
 
@@ -29,19 +29,19 @@
 
 | 原图                                                       | sobel梯度                                                    |
 | ---------------------------------------------------------- | ------------------------------------------------------------ |
-| <img src="demos/mask/ori.png" alt="ori" style="zoom:100%;" />    | <img src="demos/mask/sobel.png" alt="ori" style="zoom:100%;" />    |
+| <img src="demos/mask/ori.png" width="500" />    | <img src="demos/mask/sobel.png" width="500" />    |
 | **sobel梯度+二值化+膨胀+均值滤波得到的线条蒙版**           | **RealCUGAN生成的蒙版**                                      |
-| <img src="demos/mask/sobel2.png" alt="ori" style="zoom:100%;" /> | <img src="demos/mask/RealCUGAN.png" alt="ori" style="zoom:100%;" /> |
+| <img src="demos/mask/sobel2.png" width="500" /> | <img src="demos/mask/RealCUGAN.png" width="500" /> |
 
 可以看出，RealCUGAN生成的蒙版，对比sobel梯度，增强了线条部分的强度，抑制了背景区域（蜡烛边缘）的强度。
 
-对比case：Love Live! Superstar ED 29秒
+对比case：《Love Live! Superstar》ED 29秒
 
 | 原图                                                         | RealESRGAN-Anime6B                                           | RealESRGAN-SRVGG_v3                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src="demos/llssed-crop/ori.png" alt="ori" style="zoom:200%;" /> | <img src="demos/llssed-crop/anime6b.png" alt="ori" style="zoom:100%;" /> | <img src="demos/llssed-crop/srvggv3.png" alt="ori" style="zoom:100%;" /> |
+| <img src="demos/llssed-crop/ori.png" width="333" /> | <img src="demos/llssed-crop/anime6b.png" width="333" /> | <img src="demos/llssed-crop/srvggv3.png"  width="333" /> |
 | **RealCUGAN最大强度降噪**                                    | **RealCUGAN-Pro最大强度降噪**                                | **RealCUGAN-Pro最大强度降噪-Alpha1.5**                       |
-| <img src="demos/llssed-crop/old-d3.png" alt="ori" style="zoom:100%;" /> | <img src="demos/llssed-crop/new-d3.png" alt="ori" style="zoom:100%;" /> | <img src="demos/llssed-crop/new-d3-1d5.png" alt="ori" style="zoom:100%;" /> |
+| <img src="demos/llssed-crop/old-d3.png"  width="333" /> | <img src="demos/llssed-crop/new-d3.png"  width="333" /> | <img src="demos/llssed-crop/new-d3-1d5.png"  width="333" /> |
 
 地板的粗糙纹理是人为加上去，需要保留的。Pro对比旧版，最大降噪等级依然对纹理进行了完整的保留，并且将alpha调整至1.5可以抑制高频纹理的增强。初版RealESRGAN动漫模型将纹理全部涂抹，最新版（SRVGG_v3）动漫模型在纹理保留上有了质的飞跃，但从上面4行砖可以明显看出，这个case的纹理保留程度依然没有RealCUGAN-Pro更高。
 
@@ -49,22 +49,22 @@
 
 | 原图                                                         | RealCUGAN-Pro最大强度降噪                                    | RealESRGAN-Anime6B                                           | RealESRGAN-SRVGG_v3                                          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| <img src="demos/black_cat/ori.jpg" alt="ori" style="zoom:200%;" /> | <img src="demos/black_cat/RealCUGAN-Pro-denoise3x.jpg" alt="ori" style="zoom:100%;" /> | <img src="demos/black_cat/anime6b.png" alt="ori" style="zoom:100%;" /> | <img src="demos/black_cat/srvggv3.png" alt="ori" style="zoom:100%;" /> |
+| <img src="demos/black_cat/ori.jpg" width="250" /> | <img src="demos/black_cat/RealCUGAN-Pro-denoise3x.jpg" width="250" /> | <img src="demos/black_cat/anime6b.png"  width="250" /> | <img src="demos/black_cat/srvggv3.png"  width="250" /> |
 
 
 
 3、降噪优化
 
-对比case：《凉宫春日的忧郁2009》ED43秒
+对比case：《凉宫春日的忧郁2009》ED 43秒
 
 保守版、非降噪版本不进行任何降噪处理，改为对不合理噪声进行最低幅度的抑制，具体表现为，对可能被增强的artifact进行削除，同时不降低纹理保留度。注意到，原片的噪点（朝比奈实玖瑠的头发）经过压缩block的artifact已经变成非正常噪声，不应该保留，否则会被超分模型异常放大。如果专业压制者们实在注重噪声保留度（或者原片部分片段为艺术表现有强烈加躁），可以对原片噪声进行分析or提取，在超分后进行加躁处理。
 
 另外注意到，除了抑制不合理噪声外，Pro版的线条的去模糊处理更彻底。（下载图片 + 键盘←→切换，可轻松看出）
 
-| 原图                    | <img src="demos/con-lianggong-crop/ori.png" alt="ori" style="zoom:200%;" /> |
+| 原图                    | <img src="demos/con-lianggong-crop/ori.png" width="900" /> |
 | ----------------------- | ------------------------------------------------------------ |
-| **RealCUGAN保守版**     | <img src="demos/con-lianggong-crop/old.png" alt="ori" style="zoom:100%;" /> |
-| **RealCUGAN-Pro保守版** | <img src="demos/con-lianggong-crop/new.png" alt="ori" style="zoom:100%;" /> |
+| **RealCUGAN保守版**     | <img src="demos/con-lianggong-crop/old.png" width="900" /> |
+| **RealCUGAN-Pro保守版** | <img src="demos/con-lianggong-crop/new.png" width="900" /> |
 
 
 
