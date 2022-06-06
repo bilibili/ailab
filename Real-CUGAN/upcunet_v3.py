@@ -512,7 +512,7 @@ class UpCunet2x(nn.Module):
         if(tile_mode<3):return self.forward(x,tile_mode,1,alpha,pro)#至少切成3x3
         elif(tile_mode>=3):
             tile_mode=min(min(h0,w0)//128,int(tile_mode))#最小短边为128*128
-            if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha)
+            if (tile_mode < 3): return self.forward(x, tile_mode, 1, alpha,pro)
             t2=tile_mode*2
             crop_size=(((h0-1)//t2*t2+t2)//tile_mode,((w0-1)//t2*t2+t2)//tile_mode)
         ph = ((h0 - 1) // crop_size[0] + 1) * crop_size[0]
