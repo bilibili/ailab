@@ -14,8 +14,10 @@ Real Cascade U-Nets for Anime Image Super Resolution
 2022-02-17:适用于移动端和AMD显卡的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan)<br>
 2022-02-20:添加低显存模式(支持>1.5G显存的N卡)，以牺牲60%的速度为代价，解锁超大分辨率输入图像；下载20220220更新包或完整包使用<br>
 2022-02-27:添加faster低显存模式，相比普通模式耗时仅增加25%；添加增强处理强度alpha参数（实验性参数）；下载20220227更新包或完整包使用<br>
-2022-05-35: [Real-CUGAN-Pro](https://github.com/bilibili/ailab/blob/main/Real-CUGAN/Changelog_CN.md)；下载weights_pro参数+20220535更新包或完整包使用
+2022-05-35: [Real-CUGAN-Pro](https://github.com/bilibili/ailab/blob/main/Real-CUGAN/Changelog_CN.md)；下载weights_pro参数+20220535更新包或完整包使用<br>
+2022-06-25: [Browser-CPU-Ver](https://github.com/hanFengSan/realcugan-ncnn-webassembly)可以用浏览器体验demo效果啦，不过因为是CPU执行的，建议图像分辨率小一些。<br>
 
+访问这个网页体验demo，https://real-cugan.animesales.xyz/<br>
 如果Real-CUGAN对您的项目有帮助，可以⭐与分享一波，感谢~
 
 ### 1. 效果对比
@@ -161,6 +163,7 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
  - [Squirrel补帧团队](https://github.com/Justin62628/Squirrel-RIFE/tree/main)基于RealCUGAN(PyTorch版本)与Waifu2x/RealESRGAN开发了一个图形界面程序（默认中文），并免费发布，[Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)；<br>
  - [mnixry](https://github.com/mnixry)制作了RealCUGAN的[Web-CPU-PyTorch版](https://huggingface.co/spaces/mayhug/Real-CUGAN),大家可以免费尝鲜测试。1080P图像的2倍尺度大约需要等待24s返回结果；<br>
  - [nihui](https://github.com/nihui) 实现了RealCUGAN的[NCNN版本](https://github.com/nihui/realcugan-ncnn-vulkan) ,AMD显卡用户和移动端用户亦可以使用； <br>
+ - 网页demo版https://github.com/hanFengSan/realcugan-ncnn-webassembly
  - [第三方GUI](https://github.com/Baiyuetribe/paper2gui/blob/main/Video%20Super%20Resolution/RealCugan-GUI.md) <br>
  - [AaronFeng753](https://github.com/AaronFeng753)将RealCUGAN的Caffe版本集成进[Waifu2x-Extension-GUI](https://github.com/AaronFeng753/Waifu2x-Extension-GUI)；<br>
 
