@@ -4,7 +4,7 @@ VapourSynth用户使用说明
 
 2022-07-27
 
-你也可以使用最新版的[vs-mlrt](https://github.com/AmusementClub/vs-mlrt/releases) 来体验RealCUGAN。vs-mlrt使用了OpenVINO，ONNX与TensorRT作为其Runtime，提供了更优的性能与更低的资源占用，同时提供了多种ML模型与用户友好的python wrapper。vs-mlrt包含全部依赖，你可以将其作为滤镜安装在VapourSynth中，或下载完整的[VapourSynth Portable 包](https://github.com/AmusementClub/vs-mlrt/releases)
+你也可以使用最新版的 [vs-mlrt](https://github.com/AmusementClub/vs-mlrt/releases/latest) 来体验 RealCUGAN。vs-mlrt 支持 OpenVINO，ONNXRuntime 与 TensorRT 等运行时，相较 PyTorch 提供了更优的性能与更低的资源占用；同时也提供了多种 ML 模型（如 [DPIR](https://github.com/cszn/DPIR), [waifu2x](https://github.com/nagadomi/waifu2x) 等）与用户友好的 [Python wrapper](https://github.com/AmusementClub/vs-mlrt/blob/master/scripts/vsmlrt.py)。vs-mlrt 的二进制发布包 `vsmlrt-windows-x64-cuda` 已含全部依赖，安装简便；你也可以直接下载已经整合好的完整 [VapourSynth Portable 包](https://github.com/AmusementClub/tools/releases/latest)。
 
 
 ######官方pytorch版本   ↓   ######
