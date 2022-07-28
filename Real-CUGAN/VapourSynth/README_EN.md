@@ -1,5 +1,12 @@
 Real-CUGAN for VapourSynth, User Guide
 -------------------------------------------
+
+2022-07-27
+
+You can also use the [latest vs-mlrt release](https://github.com/AmusementClub/vs-mlrt/releases/latest) to experience RealCUGAN. vs-mlrt supports OpenVINO, ONNXRuntime and TensorRT runtimes and provides better performance & reduced resource consumption compared to the PyTorth implementation. It also includes some other ML models (e.g. [DPIR](https://github.com/cszn/DPIR), [waifu2x](https://github.com/nagadomi/waifu2x)) and a user friendly [Python wrapper](https://github.com/AmusementClub/vs-mlrt/blob/master/scripts/vsmlrt.py). vs-mlrt binary release package `vsmlrt-windows-x64-cuda` already includes everything you need to deploy those models; Alternatively, you can also use the pre-integerated [VapourSynth Portable](https://github.com/AmusementClub/tools/releases/latest).
+
+######official pytorch version   ↓   ######
+
 simple-upcunet.vpy is a simple demo.<br>
 You should append file the root of "upcunet_v3_vs.py"/"upcunet_v20220227_vs.py" into sys.path<br>
 RealWaifuUpScaler init setting：
