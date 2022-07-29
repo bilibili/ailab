@@ -1217,6 +1217,8 @@ class UpCunet4x(nn.Module):
 class RealWaifuUpScaler(object):
     def __init__(self,scale,weight_path,half,device,tile_mode,cache_mode,alpha):
         weight = torch.load(weight_path, map_location="cpu")
+        self.pro="pro"in weight
+        if(self.pro):del weight["pro"]
         self.model=eval("UpCunet%sx"%scale)()
         if(half==True):self.model=self.model.half().to(device)
         else:self.model=self.model.to(device)
