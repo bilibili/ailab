@@ -157,7 +157,7 @@ inference_video.py:一个简单的使用Real-CUGAN推理视频的脚本
 :stuck_out_tongue_closed_eyes: 欢迎各位大佬在**issue**:innocent: 进行留言,提出各种建议和需求:thumbsup: ! 
 
 ### Acknowledgement
-这里不公开训练代码，训练步骤参考了但不局限于[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md). 想自行训练的请移步该仓库。<br>
+这里不公开训练代码，训练步骤参考了但不局限于[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/docs/Training.md). 想自行训练的请移步该仓库。<br>
 模型结构魔改自Waifu2x官方[CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py).<br>
 另有:star2:更新进展:star2:如下：<br>
  - [Squirrel补帧团队](https://github.com/Justin62628/Squirrel-RIFE/tree/main)基于RealCUGAN(PyTorch版本)与Waifu2x/RealESRGAN开发了一个图形界面程序（默认中文），并免费发布，[Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)；<br>
