@@ -136,7 +136,7 @@ You can download the weights from [netdisk links](README_EN.md#2-for-windows-use
 - [x]  Simple GUI
 
 ### Acknowledgement
-The training code is from but not limited to:[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/Training.md).<br>
+The training code is from but not limited to:[RealESRGAN](https://github.com/xinntao/Real-ESRGAN/blob/master/docs/Training.md).<br>
 The original waifu2x-cunet architecture is from:[CUNet](https://github.com/nagadomi/nunif/blob/master/nunif/models/waifu2x/cunet.py).<br>
 Update progress:
 - Windows GUI (PyTorch version), [Squirrel Anime Enhance v0.0.3](https://github.com/Justin62628/Squirrel-RIFE/releases/tag/v0.0.3)<br>
