@@ -19,7 +19,6 @@ def main():
                         help='tile size (>=32/0=auto, default=0) can be 0,0,0 for multi-gpu')
     parser.add_argument('-c', type=int, default=3,
                         help='cache mode')
-    parser.add_argument('-x', help='enable tta mode') 
     parser.add_argument(
         '-f', help='output image format (jpg/png/webp, default=ext/png)')
     parser.add_argument(
