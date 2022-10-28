@@ -2,8 +2,17 @@ VapourSynth用户使用说明
 -------------------------------------------
 [中文](README.md) **|** [English](README_EN.md)
 
-simple-upcunet.vpy是一个简单的示例脚本<br>
-你需要将upcunet_v3_vs.py/upcunet_v20220227_vs.py文件的根目录添加进sys路径<br>
+2022-07-27
+
+你也可以使用最新版的 [vs-mlrt](https://github.com/AmusementClub/vs-mlrt/releases/latest) 来体验 RealCUGAN。vs-mlrt 支持 OpenVINO，ONNXRuntime 与 TensorRT 等运行时，相较 PyTorch 提供了更优的性能与更低的资源占用；同时也提供了多种 ML 模型（如 [DPIR](https://github.com/cszn/DPIR), [waifu2x](https://github.com/nagadomi/waifu2x) 等）与用户友好的 [Python wrapper](https://github.com/AmusementClub/vs-mlrt/blob/master/scripts/vsmlrt.py)。vs-mlrt 的二进制发布包 `vsmlrt-windows-x64-cuda` 已含全部依赖，安装简便；你也可以直接下载已经整合好的完整 [VapourSynth Portable 包](https://github.com/AmusementClub/tools/releases/latest)。
+
+
+######官方pytorch版本   ↓   ######
+
+simple-upcunet.vpy是一个简单的示例脚本
+
+你需要将upcunet_v3_vs.py/upcunet_v20220227_vs.py文件的根目录添加进sys路径
+
 RealWaifuUpScaler初始化参数：
   - scale: 放大倍数
   - weight_path：需要载入模型的参数的路径
