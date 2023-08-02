@@ -25,7 +25,7 @@ Real Cascade U-Nets for Anime Image Super Resolution
 ### 1. 效果对比
 
 
-https://user-images.githubusercontent.com/61866546/147812864-52fdde74-602f-4f64-ac05-4d34cc58aa79.mp4
+https://github.com/bilibili/ailab/assets/61866546/79b6061e-e46f-4789-95a8-5a1286f6b672
 
 
 - **效果图对比**(推荐点开大图在原图分辨率下对比)
